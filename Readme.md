@@ -267,7 +267,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact Information
 
-- **Author:** Nishant Mishar
+- **Author:** Nishant Mishra
 - **Email:** nishantsir57@gmail.com
 
 ---
