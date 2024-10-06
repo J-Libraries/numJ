@@ -16,35 +16,40 @@ public class App
         };
         
 		try {
-			NDArray array = new NDArray<>(arr);
-			array.shape();
-			array.ndim();
-			array.printArray();
-			NDArray transposedArray = array.transpose();
-			transposedArray.printArray();
-			transposedArray.shape();
-			transposedArray.ndim();
-			NDArray flatArray = array.flatten();
-			flatArray.printArray();
-			flatArray.shape();
-			flatArray.ndim();
+//			NDArray array = new NDArray<>(arr);
+//			array.shape();
+//			array.ndim();
+//			array.printArray();
+//			NDArray transposedArray = array.transpose();
+//			transposedArray.printArray();
+//			transposedArray.shape();
+//			transposedArray.ndim();
+//			NDArray flatArray = array.flatten();
+//			flatArray.printArray();
+//			flatArray.shape();
+//			flatArray.ndim();
 			
-//			Integer[][][] originalArray = {
-//		            {
-//		                {1, 2, 3},
-//		                {4, 5, 6}
-//		            },
-//		            {
-//		                {7, 8, 9},
-//		                {10, 11, 12}
-//		            }
-//		        };
+			Integer[][][] originalArray = {
+		            {
+		                {1, 2, 3},
+		                {4, 5, 6}
+		            },
+		            {
+		                {7, 8, 9},
+		                {10, 11, 12}
+		            }
+		        };
 
-//	        NDArray ndArray = new NDArray<>(originalArray);
-//	        System.out.println("Original Array:");
-//	        ndArray.ndim();
-//	        ndArray.shape();
-//	        ndArray.printArray();
+	        NDArray ndArray = new NDArray<>(originalArray);
+	        System.out.println("Original Array:");
+	        ndArray.ndim();
+	        ndArray.shape();
+	        ndArray.printArray();
+	        
+	        NDArray reshapedArray = ndArray.reshape(2,6);
+	        reshapedArray.ndim();
+	        reshapedArray.shape();
+	        reshapedArray.printArray();
 //	        
 //	        System.out.println("Transposed Array:");
 //	        NDArray transposed = ndArray.transpose();

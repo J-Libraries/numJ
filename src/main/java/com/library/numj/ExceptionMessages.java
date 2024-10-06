@@ -13,6 +13,10 @@ final class ExceptionMessages {
 	}
 	static String negativeSizeException(int size)
 	{
-		return "Invalid Argument : "+size+". Size of the array can not be negative.";
+		return "IllegalArgumentException : "+size+". Size of the array can not be negative.";
+	}
+	static String shapeMismatchedException(long inputShape, String outputShape)
+	{
+		return "ShapeException : Can not reshape array of size "+inputShape+" into shape"+outputShape;
 	}
 }

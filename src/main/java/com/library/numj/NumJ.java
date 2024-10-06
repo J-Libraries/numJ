@@ -8,6 +8,9 @@ import com.library.numj.exceptions.ShapeException;
 
 
 public class NumJ<T> {
+	public NDArray<T> array(T[] data) throws ShapeException{
+		return new NDArray<>(data);
+	}
 	public NDArray<Integer> arange(int end) throws ShapeException
 	{
 		if(end < 0) throw new IllegalArgumentException(ExceptionMessages.negativeSizeException(end));

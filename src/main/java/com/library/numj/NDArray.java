@@ -11,12 +11,24 @@ import com.library.numj.exceptions.ShapeException;
 public final class NDArray<T>{
 	private T[] array;
 	private int ndim;
-	private List<Integer> shape = new ArrayList<Integer>();;
+	private List<Integer> shape = new ArrayList<Integer>();
+	private long size = 0;
+	private long itemSize = 0;
 	
 	NDArray(T[] data) throws ShapeException
 	{
 		this.array = data;
 		calculateDimensions(data, 0);
+		calculateSize();
+	}
+	private void calculateSize() {
+		long size = 1;
+		for(int i : shape)
+		{
+			size *= i;
+		}
+		this.size = size;
+		this.itemSize = size+ndim;
 	}
 	private int calculateDimensions(Object arr, int level) throws ShapeException {
         if (!arr.getClass().isArray()) {
@@ -70,8 +82,9 @@ public final class NDArray<T>{
         return ndim;
     }
 	public T[] getArray() {return this.array;}
-	public int getLength(T[] array) {return array.length;}
-	public void printArray() {System.out.println(Arrays.deepToString(array));};
+	public long size() {return size;}
+	public long itemSize() {return this.itemSize;}
+	public void printArray() {System.out.println(Arrays.deepToString(array));}
 	public int ndim() {
 		System.out.println(ndim);
 		return this.ndim;
@@ -136,10 +149,49 @@ public final class NDArray<T>{
 	        return newArr;
 	    }
 	}
-	NDArray<T> arange(int last) throws ShapeException
+	public NDArray<T> reshape(int...newShape) throws ShapeException
 	{
-		Object arr[] = new Object[last];
-		Arrays.setAll(array, i -> 0+i);
-		return new NDArray(arr);
+		long newSize = 1;
+		ArrayList<Integer> outputShape = new ArrayList<>();
+		for(int dim : newShape)
+		{
+			outputShape.add(dim);
+			newSize *= dim;
+		}
+		if(this.size != newSize) {
+			throw new ShapeException(ExceptionMessages.shapeMismatchedException(size, Arrays.toString(newShape)));
+		}
+		List<Object> flatList = new ArrayList<>();
+	    flattenRecursive(this.array, flatList);
+	    Object reshapedArray = buildArrayFromFlatList(flatList, newShape, 0);
+	    NDArray<T> reshapedNDArray = new NDArray<>((T[]) reshapedArray);
+	    return reshapedNDArray;
+		
+	}
+	
+	private Object buildArrayFromFlatList(List<Object> flatList, int[] shape, int depth) {
+	    int size = shape[depth];
+	    Object[] array = new Object[size];
+	    if (depth == shape.length - 1) {
+	        for (int i = 0; i < size; i++) {
+	            Array.set(array, i, flatList.remove(0));
+	        }
+	    } else {
+	        for (int i = 0; i < size; i++) {
+	            Object subArray = buildArrayFromFlatList(flatList, shape, depth + 1);
+	            Array.set(array, i, subArray);
+	        }
+	    }
+	    return array;
+	}
+	private Class<?> getComponentType(Object obj) {
+	    if (obj == null) {
+	        return Object.class;
+	    }
+	    Class<?> cls = obj.getClass();
+	    while (cls.isArray()) {
+	        cls = cls.getComponentType();
+	    }
+	    return cls;
 	}
 }
