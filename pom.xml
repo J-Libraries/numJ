@@ -7,6 +7,21 @@
   <version>1.0-SNAPSHOT</version>
   <name>numj</name>
   <url>http://maven.apache.org</url>
+
+<!--  Plugins -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version> <!-- Ensure you're using a compatible version -->
+        <configuration>
+          <source>8</source> <!-- Set source compatibility to Java 8 -->
+          <target>8</target> <!-- Set target compatibility to Java 8 -->
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

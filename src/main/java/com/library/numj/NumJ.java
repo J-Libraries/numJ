@@ -48,4 +48,7 @@ public class NumJ<T> {
 		Arrays.setAll(arr, i -> dataType.cast(start+i));
 		return new NDArray<T>(arr);
 	}
+	public NDArray add(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
+		return new ArithmaticOperations().add(arr1, arr2);
+	}
 }
