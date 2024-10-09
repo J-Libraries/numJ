@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"com.library.numj","l":"App"},{"p":"com.library.numj.enums","l":"DType"},{"p":"com.library.numj","l":"NDArray"},{"p":"com.library.numj","l":"NumJ"},{"p":"com.library.numj.exceptions","l":"ShapeException"}];updateSearchResults();
