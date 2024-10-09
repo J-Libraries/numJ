@@ -3,7 +3,7 @@ name: Generate and Deploy Javadoc
 on:
   push:
     branches:
-      - main  # or the branch you want to trigger the workflow on push
+      - main  # or any branch you want to trigger the workflow on push
 
 jobs:
   build:
@@ -20,9 +20,6 @@ jobs:
 
     - name: Generate Javadocs
       run: mvn javadoc:javadoc
-
-    - name: Create .nojekyll file
-      run: echo "" > target/apidocs/.nojekyll
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
