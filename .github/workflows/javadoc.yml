@@ -4,20 +4,23 @@ on:
   push:
     branches:
       - master
-      - main
-
+concurrency:
+  group: pages
+  cancel-in-progress: false
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # if you have a protection rule on your repository, you'll need to give write permission to the workflow.
+      permissions:
+        contents: read
+        pages: write
+        id-token: write
     steps:
       - name: Deploy JavaDoc 🚀
         uses: MathieuSoysal/Javadoc-publisher.yml@v2.5.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          javadoc-branch: javadoc
+          deploy-mode: artifact
           java-version: 17
-          target-folder: javadoc
-          project: gradle
-          custom-command: javadoc -d javadoc -sourcepath src/main/java -subpackages .
+          project: maven # or gradle
+          # subdirectories: moduleA moduleB #for subdirectories support, needs to be run with custom command
