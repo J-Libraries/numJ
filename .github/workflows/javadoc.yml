@@ -1,28 +1,18 @@
-name: Generate and Deploy Javadoc
+name: Deploy Javadoc
 
 on:
   push:
     branches:
-      - main  # or any branch you want to trigger the workflow on push
+      - master
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up JDK 11  # or the JDK version you're using
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
-
-    - name: Generate Javadocs
-      run: mvn javadoc:javadoc
-
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./target/apidocs  # Path to your generated Javadocs
+      - name: Deploy JavaDoc 🚀
+        uses: MathieuSoysal/Javadoc-publisher.yml@v2.3.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          javadoc-branch: javadoc
+          java-version: 17
+          target-folder: javadoc 
