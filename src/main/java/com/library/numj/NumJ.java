@@ -4,10 +4,19 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import com.library.numj.enums.DType;
+import com.library.numj.enums.OperationType;
 import com.library.numj.exceptions.ShapeException;
+import com.library.numj.operations.ArithmaticOperations;
+
+import static com.library.numj.ExceptionMessages.illegalDataType;
 
 
+@SuppressWarnings("unchecked")
 public class NumJ<T> {
+	ArithmaticOperations<T> arithmaticOperations;
+	public NumJ(){
+		arithmaticOperations = new ArithmaticOperations<>();
+	}
 	public NDArray<T> array(T[] data) throws ShapeException{
 		return new NDArray<>(data);
 	}
@@ -35,20 +44,32 @@ public class NumJ<T> {
 				dataType = Float.class; break;
 			case FLOAT64:
 				dataType = Double.class; break;
-			case UINT8:
+			case INT8:
 				dataType = Byte.class; break;
-			case UINT16:
+			case INT16:
 				dataType = Short.class; break;
-			case UINT64:
+			case INT32:
+				dataType = Integer.class; break;
+			case INT64:
 				dataType = Long.class; break;
 			default:
-				dataType = Integer.class;
+				throw new IllegalArgumentException(illegalDataType(dType));
 		}
 		T[] arr =(T[]) Array.newInstance(dataType, end-start);
 		Arrays.setAll(arr, i -> dataType.cast(start+i));
 		return new NDArray<T>(arr);
 	}
-	public NDArray add(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
-		return new ArithmaticOperations().add(arr1, arr2);
+	public NDArray<T> add(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
+		return (NDArray<T>) arithmaticOperations.operate(arr1, arr2, OperationType.ADDITION);
+	}
+
+	public NDArray<T> subtract(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
+		return (NDArray<T>) arithmaticOperations.operate(arr1, arr2, OperationType.SUBTRACTION);
+	}
+	public NDArray<T> multiply(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
+		return (NDArray<T>) arithmaticOperations.operate(arr1, arr2, OperationType.MULTIPLICATION);
+	}
+	public NDArray<T> divide(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
+		return (NDArray<T>) arithmaticOperations.operate(arr1, arr2, OperationType.DIVISION);
 	}
 }

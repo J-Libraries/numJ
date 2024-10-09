@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Utils<T> {
+public final class Utils<T> {
 
     static Map<Class<?>, Integer> classSizeMap = new HashMap<>();
     static {
@@ -17,7 +17,7 @@ class Utils<T> {
         classSizeMap.put(Short.class, 2);
         classSizeMap.put(Byte.class, 1);
     }
-    static int[] broadcastShapes(List<Integer> shape1, List<Integer> shape2) throws ShapeException {
+    public int[] broadcastShapes(List<Integer> shape1, List<Integer> shape2) throws ShapeException {
 
         int len1 = shape1.size();
         int len2 = shape2.size();
@@ -39,14 +39,14 @@ class Utils<T> {
         return resultShape;
     }
 
-    static int getElementSize(Class<?> clazz) {
+    public int getElementSize(Class<?> clazz) {
         if (classSizeMap.containsKey(clazz)) {
             return classSizeMap.get(clazz);
         } else {
             throw new IllegalArgumentException("Unsupported data type: " + clazz.getSimpleName());
         }
     }
-    static int[] getMultiDimIndices(int flatIndex, int[] shape) {
+    public int[] getMultiDimIndices(int flatIndex, int[] shape) {
         int ndim = shape.length;
         int[] indices = new int[ndim];
         for (int i = ndim - 1; i >= 0; i--) {
@@ -55,7 +55,7 @@ class Utils<T> {
         }
         return indices;
     }
-    static int getFlatIndex(int[] indices, int[] strides) {
+    public int getFlatIndex(int[] indices, int[] strides) {
         int flatIndex = 0;
         for (int i = 0; i < indices.length; i++) {
             flatIndex += indices[i] * strides[i];

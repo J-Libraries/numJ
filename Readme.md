@@ -1,3 +1,5 @@
+### Updated `README.md`
+
 # NumJ - A Java Numerical Computing Library
 
 NumJ is a Java library inspired by NumPy, providing support for multi-dimensional arrays and mathematical operations. It aims to bring the functionality of NumPy to Java, enabling efficient numerical computations and array manipulations.
@@ -16,6 +18,7 @@ NumJ is a Java library inspired by NumPy, providing support for multi-dimensiona
   - [NumJ Class](#numj-class)
     - [`array` Method](#array-method)
     - [`arange` Method](#arange-method)
+    - [Arithmetic Operations](#arithmetic-operations)
 - [Supported Data Types](#supported-data-types)
 - [Exception Handling](#exception-handling)
 - [Examples](#examples)
@@ -23,6 +26,8 @@ NumJ is a Java library inspired by NumPy, providing support for multi-dimensiona
   - [Transposing an Array](#transposing-an-array)
   - [Reshaping an Array](#reshaping-an-array)
   - [Creating an Array with `arange`](#creating-an-array-with-arange)
+  - [Arithmetic Operations on Arrays](#arithmetic-operations-on-arrays)
+- [Future Scope](#future-scope)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact Information](#contact-information)
@@ -34,6 +39,7 @@ NumJ is a Java library inspired by NumPy, providing support for multi-dimensiona
 - Array flattening (`flatten`)
 - Array transposition (`transpose`)
 - Array creation functions (`arange`, `array`)
+- Arithmetic operations on arrays (`add`, `subtract`, `multiply`, `divide`, `modulo`)
 - Support for various numerical data types (`DType`)
 - Exception handling for shape mismatches and invalid operations
 
@@ -54,7 +60,7 @@ dependencyResolutionManagement {
     }
 }
 dependencies {
-    implementation 'com.github.J-Libraries:numJ:1.0.0'
+    implementation 'com.github.J-Libraries:numJ:1.0.1'
 }
 ```
 
@@ -73,7 +79,7 @@ Add the following to your `pom.xml` file:
 <dependency>
     <groupId>com.github.J-Libraries</groupId>
     <artifactId>numJ</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
@@ -174,24 +180,58 @@ NDArray<Integer> array1 = numj.arange(5);
 NDArray<Integer> array2 = numj.arange(2, 7);
 
 // Creates [1.0, 2.0, 3.0] with FLOAT32 data type
-NDArray<Float> array3 = numj.arange(1, 4, DType.FLOAT32);
+NumJ<Float> numjFloat = new NumJ<>();
+NDArray<Float> array3 = numjFloat.arange(1, 4, DType.FLOAT32);
+```
+
+### Arithmetic Operations
+
+The `NumJ` class now supports basic arithmetic operations on arrays: addition, subtraction, multiplication, and division. Arrays must have compatible shapes for broadcasting.
+
+**Supported Operations:**
+
+- `add(arr1, arr2)`: Element-wise addition of two arrays(Numbers and Strings).
+- `subtract(arr1, arr2)`: Element-wise subtraction of two arrays.
+- `multiply(arr1, arr2)`: Element-wise multiplication of two arrays.
+- `divide(arr1, arr2)`: Element-wise division of two arrays.
+- `modulo(arr1, arr2)`: Element-wise modulo of two arrays(Non-Floating Numbers).
+
+**Usage Examples:**
+
+```java
+NumJ<Integer> numj = new NumJ<>();
+NDArray<Integer> arr1 = numj.arange(5); // [0, 1, 2, 3, 4]
+NDArray<Integer> arr2 = numj.arange(5); // [0, 1, 2, 3, 4]
+
+// Addition
+NDArray<Integer> sum = numj.add(arr1, arr2);
+sum.printArray(); // [0, 2, 4, 6, 8]
+
+// Subtraction
+NDArray<Integer> diff = numj.subtract(arr1, arr2);
+diff.printArray(); // [0, 0, 0, 0, 0]
 ```
 
 ## Supported Data Types
 
 The `DType` enum defines the supported numerical data types for arrays:
 
-- `FLOAT32`: 32-bit floating-point (`Float`)
-- `FLOAT64`: 64-bit floating-point (`Double`)
-- `UINT8`: 8-bit unsigned integer (`Byte`)
-- `UINT16`: 16-bit unsigned integer (`Short`)
-- `UINT32`: 32-bit unsigned integer (`Integer`)
-- `UINT64`: 64-bit unsigned integer (`Long`)
+```java
+public enum DType {
+    FLOAT32,  // 32-bit floating-point (Float)
+    FLOAT64,  // 64-bit floating-point (Double)
+    INT8,     // 8-bit signed integer (Byte)
+    INT16,    // 16-bit signed integer (Short)
+    INT32,    // 32-bit signed integer (Integer)
+    INT64     // 64-bit signed integer (Long)
+}
+```
 
 **Example:**
 
 ```java
-NDArray<Double> doubleArray = numj.arange(0, 10, DType.FLOAT64);
+NumJ<Double> numjDouble = new NumJ<>();
+NDArray<Double> doubleArray = numjDouble.arange(0, 10, DType.FLOAT64);
 ```
 
 ## Exception Handling
@@ -255,6 +295,157 @@ NDArray<Integer> array = numj.arange(10);
 array.printArray(); // Output: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 ```
 
+### Arithmetic Operations on Arrays
+
+```java
+NumJ<Integer> numj = new NumJ<>();
+NDArray<Integer> arr1 = numj.arange(5); // [0, 1, 2, 3, 4]
+NDArray<Integer> arr2 = numj.arange(5); // [0, 1, 2, 3, 4]
+
+// Element-wise addition
+NDArray<Integer> sum = numj.add(arr1, arr2);
+sum.printArray(); // [0, 2, 4, 6, 8]
+
+// Element-wise multiplication
+NDArray<Integer> product = numj.multiply(arr1, arr2);
+product.printArray(); // [0, 1, 4, 9, 16]
+```
+
+## Future Scope
+
+NumJ is continuously evolving. The future scope includes implementing more features from NumPy to enhance the library's capabilities. Below is a detailed list of planned additions:
+
+### 1. Advanced Array Creation Functions
+
+- **Zeros and Ones:**
+  - `zeros(shape, dtype)`: Create an array filled with zeros.
+  - `ones(shape, dtype)`: Create an array filled with ones.
+- **Empty and Full:**
+  - `empty(shape, dtype)`: Create an uninitialized array.
+  - `full(shape, fill_value, dtype)`: Create an array filled with a specified value.
+- **Linspace and Logspace:**
+  - `linspace(start, stop, num, endpoint, dtype)`: Create an array of evenly spaced numbers over a specified interval.
+  - `logspace(start, stop, num, base, dtype)`: Create an array of numbers spaced evenly on a log scale.
+
+### 2. Array Manipulation and Reshaping
+
+- **Shape Manipulation:**
+  - `expand_dims(a, axis)`: Expand the shape of an array.
+  - `squeeze(a, axis)`: Remove single-dimensional entries from the shape.
+- **Joining Arrays:**
+  - `concatenate((a1, a2, ...), axis)`: Join a sequence of arrays along an existing axis.
+  - `stack(arrays, axis)`: Join a sequence of arrays along a new axis.
+- **Splitting Arrays:**
+  - `split(a, indices_or_sections, axis)`: Split an array into multiple sub-arrays.
+  - `hsplit(a, indices_or_sections)`: Split an array horizontally.
+  - `vsplit(a, indices_or_sections)`: Split an array vertically.
+
+### 3. Mathematical Operations
+
+- **Element-wise Mathematical Functions:**
+  - `sin(a)`, `cos(a)`, `tan(a)`: Trigonometric functions.
+  - `exp(a)`, `log(a)`, `sqrt(a)`: Exponential, logarithmic, and square root functions.
+  - `abs(a)`: Absolute value.
+- **Aggregate Functions:**
+  - `sum(a, axis)`: Sum of array elements over a given axis.
+  - `prod(a, axis)`: Product of array elements over a given axis.
+  - `cumsum(a, axis)`: Cumulative sum.
+  - `cumprod(a, axis)`: Cumulative product.
+
+### 4. Linear Algebra
+
+- **Matrix Operations:**
+  - `dot(a, b)`: Dot product of two arrays.
+  - `matmul(a, b)`: Matrix product.
+  - `transpose(a)`: Transpose of an array.
+- **Decompositions:**
+  - `linalg.inv(a)`: Inverse of a matrix.
+  - `linalg.det(a)`: Determinant of a matrix.
+  - `linalg.eig(a)`: Eigenvalues and eigenvectors.
+
+### 5. Random Number Generation
+
+- **Random Sampling:**
+  - `random.rand(d0, d1, ..., dn)`: Random values in a given shape.
+  - `random.randn(d0, d1, ..., dn)`: Sample from the standard normal distribution.
+  - `random.randint(low, high, size, dtype)`: Random integers from `low` (inclusive) to `high` (exclusive).
+- **Random Permutations:**
+  - `random.shuffle(a)`: Shuffle the array along the first axis.
+  - `random.permutation(a)`: Randomly permute a sequence or return a permuted range.
+
+### 6. Broadcasting and Advanced Indexing
+
+- **Broadcasting Mechanism:**
+  - Implement full support for broadcasting rules to allow operations on arrays of different shapes.
+- **Advanced Indexing:**
+  - Support for integer array indexing and boolean array indexing.
+
+### 7. Statistical Functions
+
+- **Descriptive Statistics:**
+  - `mean(a, axis)`: Compute the arithmetic mean.
+  - `std(a, axis)`, `var(a, axis)`: Compute the standard deviation and variance.
+  - `min(a, axis)`, `max(a, axis)`: Minimum and maximum values.
+- **Correlation and Covariance:**
+  - `corrcoef(x)`: Return Pearson product-moment correlation coefficients.
+  - `cov(m)`: Estimate a covariance matrix.
+
+### 8. Sorting, Searching, and Counting
+
+- **Sorting Algorithms:**
+  - `sort(a, axis)`: Return a sorted copy of an array.
+  - `argsort(a, axis)`: Indirect sort indices.
+- **Searching Algorithms:**
+  - `where(condition, x, y)`: Return elements chosen from `x` or `y` depending on `condition`.
+  - `nonzero(a)`: Return the indices of non-zero elements.
+  - `argmax(a, axis)`, `argmin(a, axis)`: Indices of the maximum and minimum values.
+
+### 9. Input/Output Operations
+
+- **File Reading and Writing:**
+  - `loadtxt(fname, dtype, delimiter)`: Load data from a text file.
+  - `savetxt(fname, X, fmt, delimiter)`: Save an array to a text file.
+  - `save(file, arr)`: Save an array to a binary file in NumPy `.npy` format.
+  - `load(file)`: Load arrays from `.npy`, `.npz` files, or pickled files.
+
+### 10. Handling Missing Data
+
+- **NaN and Infinite Values:**
+  - `isnan(a)`: Return a boolean array where NaN values are `True`.
+  - `isinf(a)`: Test element-wise for positive or negative infinity.
+  - `nan_to_num(a)`: Replace NaN with zero and infinity with large finite numbers.
+
+### 11. Bitwise Operations
+
+- **Bitwise Functions:**
+  - `bitwise_and(x1, x2)`: Compute bitwise AND.
+  - `bitwise_or(x1, x2)`: Compute bitwise OR.
+  - `invert(x)`: Compute bitwise NOT.
+  - `left_shift(x1, x2)`: Shift bits of `x1` left by `x2` positions.
+  - `right_shift(x1, x2)`: Shift bits of `x1` right by `x2` positions.
+
+### 12. Set Operations
+
+- **Unique and Set Functions:**
+  - `unique(ar)`: Find the unique elements of an array.
+  - `intersect1d(ar1, ar2)`: Intersection of two arrays.
+  - `union1d(ar1, ar2)`: Union of two arrays.
+  - `setdiff1d(ar1, ar2)`: Set difference of two arrays.
+
+### 13. Memory Management and Performance
+
+- **Memory Views:**
+  - Implement views for arrays to share data without copying.
+- **Memory Mapping:**
+  - `memmap`: Memory-mapped file support for large datasets.
+
+### 14. Data Type Handling
+
+- **Type Conversion and Inspection:**
+  - `astype(dtype)`: Copy of the array, cast to a specified type.
+  - `can_cast(from_, to)`: Returns `True` if cast between data types can occur without loss.
+  - `result_type(*arrays_and_dtypes)`: Returns the type resulting from applying the NumPy type promotion rules.
+
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request for any improvements or bug fixes.
@@ -271,9 +462,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Email:** nishantsir57@gmail.com
 
 ---
-
-
-
-
-
-
