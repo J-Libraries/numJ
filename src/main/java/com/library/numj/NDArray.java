@@ -1,10 +1,14 @@
 package com.library.numj;
 
+import com.library.numj.exceptions.ShapeException;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.library.numj.exceptions.ShapeException;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 /**
  * Represents an N-dimensional array in the NumJ library.
@@ -15,7 +19,7 @@ import com.library.numj.exceptions.ShapeException;
 @SuppressWarnings("unchecked")
 public final class NDArray<T> {
 	/** The underlying array data. */
-	private final T[] array;
+	private T array;
 	/** The number of dimensions of the array. */
 	private int ndim;
 	/** The shape of the array, represented as a list of integers. */
@@ -26,18 +30,42 @@ public final class NDArray<T> {
 	private long itemSize = 0;
 	/** Utility class instance for helper methods. */
 	Utils<T> utils;
-
 	/**
 	 * Constructs an NDArray from the given data array.
 	 *
 	 * @param data The array data to initialize the NDArray with.
 	 * @throws ShapeException If the array has an inhomogeneous shape.
 	 */
-	NDArray(T[] data) throws ShapeException {
+	NDArray(T data) throws ShapeException {
 		utils = new Utils<>();
-		this.array = data;
 		calculateDimensions(data, 0);
 		calculateSize();
+		int[] arrayShape = shape.stream().mapToInt(Integer::intValue).toArray();
+		this.array = (T) Array.newInstance(Integer.class, arrayShape);
+		this.array = createDeepCopy(data);
+	}
+	@SuppressWarnings("unchecked")
+	private T createDeepCopy(T array) {
+		if (!array.getClass().isArray()) {
+			return array;  // Not an array, return as is
+		}
+
+		int length = Array.getLength(array);
+		T newArray = (T) Array.newInstance(array.getClass().getComponentType(), length);
+
+		// Parallel stream to copy array elements concurrently
+		IntStream.range(0, length).parallel().forEach(i -> {
+			Object element = Array.get(array, i);
+			if (element != null && element.getClass().isArray()) {
+				// Recursively copy nested arrays in parallel
+				Array.set(newArray, i, createDeepCopy((T) element));
+			} else {
+				// Copy primitive or object
+				Array.set(newArray, i, element);
+			}
+		});
+
+		return newArray;
 	}
 
 	/**
@@ -60,58 +88,69 @@ public final class NDArray<T> {
 	 * @return The number of dimensions.
 	 * @throws ShapeException If the array has an inhomogeneous shape.
 	 */
-	private int calculateDimensions(Object arr, int level) throws ShapeException {
+	public int calculateDimensions(Object arr, int level) throws ShapeException {
 		if (!arr.getClass().isArray()) {
 			return ndim;
 		}
+
 		int length = Array.getLength(arr);
-		if (shape.size() > level) {
-			if (length != shape.get(level)) {
-				throw new ShapeException(ExceptionMessages.getShapeException(ndim, shape));
-			}
-		} else {
-			shape.add(length);
-			ndim++;
-		}
-		int previousDim = 0;
-		Class<?> previousClass = null;
-		if (length > 0) {
-			Object firstElement = Array.get(arr, 0);
-			if (firstElement != null) {
-				previousClass = firstElement.getClass();
+
+		synchronized (this) {  // Synchronize access to shared state (shape, ndim)
+			if (shape.size() > level) {
+				if (length != shape.get(level)) {
+					throw new ShapeException(ExceptionMessages.getShapeException(ndim, shape));
+				}
+			} else {
+				shape.add(length);
+				ndim++;
 			}
 		}
 
-		for (int i = 0; i < length; i++) {
+		// Check the first element's class type
+		Class<?> previousClass = (length > 0 && Array.get(arr, 0) != null)
+				? Array.get(arr, 0).getClass()
+				: null;
+
+		AtomicInteger previousDim = new AtomicInteger();
+
+		// Parallel stream to process the array
+		IntStream.range(0, length).sequential().forEach(i -> {
 			Object element = Array.get(arr, i);
 
 			if (element != null && element.getClass().isArray()) {
 				if (previousClass != null && previousClass.isArray()) {
-					int dim = calculateDimensions(element, level + 1);
-					if (i == 0) {
-						previousDim = dim;
-					} else if (dim != previousDim) {
-						throw new ShapeException(ExceptionMessages.getShapeException(ndim, shape));
+					try {
+						int dim = calculateDimensions(element, level + 1);
+						synchronized (this) {
+							if (i == 0) {
+								previousDim.set(dim);
+							} else if (dim != previousDim.get()) {
+								throw new RuntimeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
+							}
+						}
+					} catch (ShapeException e) {
+						throw new RuntimeException(e);
 					}
-
 				} else {
-					throw new ShapeException(ExceptionMessages.getShapeException(ndim, shape));
+					throw new RuntimeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
 				}
 			} else {
 				if (previousClass != null && previousClass.isArray()) {
-					throw new ShapeException(ExceptionMessages.getShapeException(ndim, shape));
+					throw new RuntimeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
 				}
 			}
-		}
+		});
+
 		return ndim;
 	}
+
 
 	/**
 	 * Returns the underlying array data.
 	 *
 	 * @return The array data.
 	 */
-	public T[] getArray() {
+	public T getArray() {
 		return this.array;
 	}
 
@@ -137,7 +176,7 @@ public final class NDArray<T> {
 	 * Prints the array in a multi-dimensional format.
 	 */
 	public void printArray() {
-		System.out.println(Arrays.deepToString(array));
+		System.out.println(Arrays.deepToString((Object[]) array));
 	}
 
 	/**
@@ -166,11 +205,9 @@ public final class NDArray<T> {
 	 */
 	private void flattenRecursive(T currentArray, List<Object> flatList) {
 		if (currentArray.getClass().isArray()) {
-			int length = Array.getLength(currentArray);
-			for (int i = 0; i < length; i++) {
-				T element = (T) Array.get(currentArray, i);
-				flattenRecursive(element, flatList);
-			}
+			Arrays.stream(((T[])currentArray)).sequential()
+					.forEach(element ->flattenRecursive(element, flatList));
+
 		} else {
 			flatList.add(currentArray);
 		}
@@ -184,8 +221,8 @@ public final class NDArray<T> {
 	 */
 	@SuppressWarnings("rawtypes")
 	public NDArray flatten() throws ShapeException {
-		List<Object> flatList = new ArrayList<>();
-		flattenRecursive((T) this.array, flatList);
+		List<Object> flatList = new CopyOnWriteArrayList<>();
+		flattenRecursive(this.array, flatList);
 		Object[] flattenedArray = flatList.toArray(new Object[0]);
 		return new NDArray(flattenedArray);
 	}
@@ -202,7 +239,7 @@ public final class NDArray<T> {
 			axes[i] = ndim - 1 - i;
 		}
 		Object transposedArray = transposeRecursive(array, axes, new int[0]);
-		return new NDArray<>((T[]) transposedArray);
+		return new NDArray<>((T) transposedArray);
 	}
 
 	/**
@@ -254,10 +291,10 @@ public final class NDArray<T> {
 		if (this.size != newSize) {
 			throw new ShapeException(ExceptionMessages.shapeMismatchedException(size, Arrays.toString(newShape)));
 		}
-		List<Object> flatList = new ArrayList<>();
-		flattenRecursive((T) this.array, flatList);
+		List<Object> flatList = new CopyOnWriteArrayList<>();
+		flattenRecursive(this.array, flatList);
 		Object reshapedArray = buildArrayFromFlatList(flatList, newShape, 0);
-		return new NDArray<>((T[]) reshapedArray);
+		return new NDArray<>((T) reshapedArray);
 	}
 
 	/**

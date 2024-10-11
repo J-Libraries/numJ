@@ -2,3 +2,7 @@ target/
 .idea
 .settings
 .classpath
+TestClass.java
+docs/
+LICENSE
+CompleteScope.md

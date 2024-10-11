@@ -2,6 +2,7 @@ package com.library.numj;
 
 import com.library.numj.enums.DType;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public final class ExceptionMessages {
 		shape.remove(shape.size() - 1);
 		ndim--;
 		return "The requested array has an inhomogeneous shape after "
-				+ ndim + " dimensions. The detected shape was " + shape.toString()
+				+ ndim + " dimensions. The detected shape was " + shape
 				+ " + inhomogeneous part.";
 	}
 
@@ -36,8 +37,19 @@ public final class ExceptionMessages {
 	 * @return A formatted exception message indicating the illegal negative size.
 	 */
 	public static String negativeSizeException(int size) {
-		return "IllegalArgumentException : " + size + ". Size of the array cannot be negative.";
+		return "IllegalArgumentException : Size ("+size+")of the array cannot be negative.";
 	}
+
+	/**
+	 * Generates an exception message for negative skip values.
+	 *
+	 * @param skip The negative value encountered.
+	 * @return A formatted exception message indicating the illegal negative skip.
+	 */
+	public static String negativeSkipException(int skip) {
+		return "IllegalArgumentException : Skip value ("+skip+")cannot be negative.";
+	}
+
 
 	/**
 	 * Generates an exception message when reshaping arrays with mismatched sizes.
@@ -47,7 +59,7 @@ public final class ExceptionMessages {
 	 * @return A formatted exception message indicating the shape mismatch.
 	 */
 	public static String shapeMismatchedException(long inputShape, String outputShape) {
-		return "ShapeException : Cannot reshape array of size " + inputShape + " into shape " + outputShape;
+		return "ShapeException : Cannot reshape array of Shape " + inputShape + " into Shape " + outputShape;
 	}
 
 	/**
@@ -58,5 +70,9 @@ public final class ExceptionMessages {
 	 */
 	public static String illegalDataType(DType dType) {
 		return "IllegalArgumentException : Data type you have provided is not supported: " + dType;
+	}
+	public static String shapeMismatchException(int size, int...shape)
+	{
+		return "ShapeMismatchException : The provided shape:"+ Arrays.toString(shape) +" is not matching with provided size: "+size;
 	}
 }

@@ -40,15 +40,19 @@ public class ArithmaticOperations<T> {
         // Compute broadcasted shape
         int[] broadcastedShape = utils.broadcastShapes(arr1.shape(), arr2.shape());
 
+        // Calculate total number of elements in the result
+        long totalElementsLong = 1;
+        for (int dim : broadcastedShape) {
+            totalElementsLong *= dim;
+            if (totalElementsLong > Integer.MAX_VALUE) {
+                throw new ShapeException("Total number of elements exceeds the maximum allowed size.");
+            }
+        }
         // Get strides for indexing
         int[] arr1Strides = arr1.strides();
         int[] arr2Strides = arr2.strides();
 
-        // Calculate total number of elements in the result
-        int totalElements = 1;
-        for (int dim : broadcastedShape) {
-            totalElements *= dim;
-        }
+        int totalElements = (int)totalElementsLong;
 
         // Flatten the input arrays for easy indexing
         T[] flatArr1 = (T[]) arr1.flatten().getArray();
@@ -61,14 +65,18 @@ public class ArithmaticOperations<T> {
         // Initialize the output array
         Object[] outputArray = new Object[totalElements];
 
+        int arr1Offset = broadcastedShape.length - arr1.shape().size();
+        int arr2Offset = broadcastedShape.length - arr2.shape().size();
+
         // Perform the operation element-wise
-        for (int i = 0; i < totalElements; i++) {
+        for (int i = 0; i < totalElements; i++){
+//            IntStream.range(0, totalElements).parallel().forEach(i ->{
             // Compute multi-dimensional indices for broadcasting
             int[] multiDimIndices = utils.getMultiDimIndices(i, broadcastedShape);
 
             // Adjust indices for arr1 based on its shape
             int[] arr1Indices = new int[arr1.shape().size()];
-            int arr1Offset = broadcastedShape.length - arr1.shape().size();
+
             for (int j = 0; j < arr1.shape().size(); j++) {
                 if (arr1.shape().get(j) == 1) {
                     arr1Indices[j] = 0;
@@ -79,7 +87,6 @@ public class ArithmaticOperations<T> {
 
             // Adjust indices for arr2 based on its shape
             int[] arr2Indices = new int[arr2.shape().size()];
-            int arr2Offset = broadcastedShape.length - arr2.shape().size();
             for (int j = 0; j < arr2.shape().size(); j++) {
                 if (arr2.shape().get(j) == 1) {
                     arr2Indices[j] = 0;
