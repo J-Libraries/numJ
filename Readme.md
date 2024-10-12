@@ -42,6 +42,7 @@ NumJ is a Java library inspired by NumPy, providing support for multi-dimensiona
 - Arithmetic operations on arrays (`add`, `subtract`, `multiply`, `divide`, `modulo`)
 - Support for various numerical data types (`DType`)
 - Exception handling for shape mismatches and invalid operations
+- **New**: Support for dynamic step sizes in `arange` method with customized shapes
 
 ## Installation
 
@@ -169,6 +170,7 @@ Creates an array with evenly spaced values within a given interval.
 1. `arange(int end)`: Creates an array from `0` to `end - 1`.
 2. `arange(int start, int end)`: Creates an array from `start` to `end - 1`.
 3. `arange(int start, int end, DType dType)`: Creates an array with the specified data type.
+4. `arange(int start, int end, int skip, int[] shape)`: Creates an array with dynamic steps and specified shape.
 
 **Usage Examples:**
 
@@ -182,6 +184,10 @@ NDArray<Integer> array2 = numj.arange(2, 7);
 // Creates [1.0, 2.0, 3.0] with FLOAT32 data type
 NumJ<Float> numjFloat = new NumJ<>();
 NDArray<Float> array3 = numjFloat.arange(1, 4, DType.FLOAT32);
+
+// Creates [0, 2, 4, 6] with a shape of 2x2
+int[] shape = {2, 2};
+NDArray<Integer> array4 = numj.arange(0, 8, 2, shape);
 ```
 
 ### Arithmetic Operations
@@ -190,11 +196,11 @@ The `NumJ` class now supports basic arithmetic operations on arrays: addition, s
 
 **Supported Operations:**
 
-- `add(arr1, arr2)`: Element-wise addition of two arrays(Numbers and Strings).
+- `add(arr1, arr2)`: Element-wise addition of two arrays.
 - `subtract(arr1, arr2)`: Element-wise subtraction of two arrays.
 - `multiply(arr1, arr2)`: Element-wise multiplication of two arrays.
 - `divide(arr1, arr2)`: Element-wise division of two arrays.
-- `modulo(arr1, arr2)`: Element-wise modulo of two arrays(Non-Floating Numbers).
+- `modulo(arr1, arr2)`: Element-wise modulo of two arrays.
 
 **Usage Examples:**
 
@@ -241,7 +247,7 @@ NumJ provides robust exception handling through the `ShapeException` class for o
 **Common Exceptions:**
 
 - `ShapeException`: Thrown when an operation cannot be performed due to incompatible shapes.
-- `IllegalArgumentException`: Thrown when invalid arguments are provided (e.g., negative sizes).
+- `IllegalArgumentException`: Thrown when invalid arguments are provided (e.g., negative sizes or skips).
 
 **Example:**
 
@@ -252,6 +258,8 @@ try {
     e.printStackTrace();
 }
 ```
+
+
 
 ## Examples
 
@@ -448,9 +456,46 @@ NumJ is continuously evolving. The future scope includes implementing more featu
 
 ## Contributing
 
-Contributions are welcome! Please fork the repository and submit a pull request for any improvements or bug fixes.
+We welcome contributions to NumJ! Follow the steps below to get started:
 
-**Note:** Currently, direct pushes to the repository are restricted. All changes must be submitted via pull requests to ensure code reviews and maintain code quality.
+### Steps for Contribution:
+
+1. **Fork the Repository**:
+- Visit the [NumJ GitHub repository](https://github.com/J-Libraries/NumJ) and fork it to your GitHub account.
+
+2. **Select a Task**:
+- Go to the [NumJ Project Board](https://github.com/orgs/J-Libraries/projects/1) to view open tasks or issues.
+- Choose an issue or task that interests you. You can pick any task that is unassigned.
+
+3. **Clone Your Fork**:
+- Clone your forked repository to your local machine.
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/NumJ.git
+   cd NumJ
+   ```
+
+4. **Work on the Task**:
+- Create a new branch from `main` for your task:
+   ```bash
+   git checkout -b feature/task-name
+   ```
+- Make your changes, commit them, and push to your fork:
+   ```bash
+   git add .
+   git commit -m "Add description of the task you worked on"
+   git push origin feature/task-name
+   ```
+
+5. **Create a Pull Request**:
+- After pushing your changes, go to your repository on GitHub and create a pull request (PR) against the `main` branch of the original NumJ repository.
+
+6. **Review Process**:
+- Your PR will be reviewed by maintainers. Please be patient, and address any comments or requested changes.
+
+7. **Merge**:
+- Once approved, your PR will be merged into the main repository, and you will be credited for your contribution.
+
+For more details on how to contribute, refer to the [Contributing Guidelines](CONTRIBUTING.md) or reach out to the maintainers.
 
 ## License
 

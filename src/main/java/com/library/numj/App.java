@@ -59,7 +59,7 @@ public class App
     }
     private static void testArrayCreationOperations() throws ShapeException {
         NumJ numJ = new NumJ();
-        NDArray arr  = numJ.arange(10, 21, 1);
+        NDArray arr  = numJ.arange(10, 101, 9);
         arr.printArray();
     }
 }
