@@ -2,9 +2,11 @@ package com.library.numj;
 
 import com.library.numj.enums.DType;
 import com.library.numj.enums.OperationType;
+import com.library.numj.enums.Order;
 import com.library.numj.exceptions.ShapeException;
 import com.library.numj.exceptions.ShapeMismatchException;
 import com.library.numj.operations.ArithmaticOperations;
+import com.library.numj.operations.ArrayCreation;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -39,6 +41,75 @@ public class NumJ<T> {
 	public NDArray<T> array(T data) throws ShapeException{
 		return new NDArray<>(data);
 	}
+
+
+	/**
+	 * Creates an NDArray filled with zeros of the given shape, using the default data type (INT32) and C order.
+	 *
+	 * @param shape The shape of the NDArray.
+	 * @return An NDArray filled with zeros.
+	 */
+	public NDArray<Number> zeros(int[] shape) {
+		return zeros(shape, DType.INT32, Order.C);
+	}
+
+
+	/**
+	 * Creates an NDArray filled with zeros of the given shape and specified data type, using C order.
+	 *
+	 * @param shape The shape of the NDArray.
+	 * @param dType The data type of the elements in the NDArray.
+	 * @return An NDArray filled with zeros.
+	 */
+	public NDArray<Number> zeros(int[] shape, DType dType) {
+		return zeros(shape, dType, Order.C);
+	}
+
+	/**
+	 * Creates an NDArray filled with zeros of the given shape, specified data type, and memory order.
+	 *
+	 * @param shape The shape of the NDArray.
+	 * @param dType The data type of the elements in the NDArray.
+	 * @param order The memory layout order, either C (row-major) or F (column-major).
+	 * @return An NDArray filled with zeros.
+	 */
+	public NDArray<Number> zeros(int[] shape, DType dType, Order order) {
+		return ArrayCreation.zeros(shape, dType);
+	}
+
+	/**
+	 * Creates an NDArray filled with ones of the given shape, using the default data type (INT32) and C order.
+	 *
+	 * @param shape The shape of the NDArray.
+	 * @return An NDArray filled with ones.
+	 */
+	public NDArray<Number> ones(int[] shape) {
+		return ones(shape, DType.INT32, Order.C);
+	}
+
+	/**
+	 * Creates an NDArray filled with ones of the given shape and specified data type, using C order.
+	 *
+	 * @param shape The shape of the NDArray.
+	 * @param dType The data type of the elements in the NDArray.
+	 * @return An NDArray filled with ones.
+	 */
+	public NDArray<Number> ones(int[] shape, DType dType) {
+		return ones(shape, dType, Order.C);
+	}
+
+	/**
+	 * Creates an NDArray filled with ones of the given shape, specified data type, and memory order.
+	 *
+	 * @param shape The shape of the NDArray.
+	 * @param dType The data type of the elements in the NDArray.
+	 * @param order The memory layout order, either C (row-major) or F (column-major).
+	 * @return An NDArray filled with ones.
+	 */
+	public NDArray<Number> ones(int[] shape, DType dType, Order order) {
+		return ArrayCreation.ones(shape, dType);
+	}
+
 
 	/**
 	 * Generates an NDArray with a range of integers from 0 up to (but not including) end.

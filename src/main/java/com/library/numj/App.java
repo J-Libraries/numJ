@@ -4,6 +4,7 @@
  */
 package com.library.numj;
 
+import com.library.numj.enums.DType;
 import com.library.numj.exceptions.ShapeException;
 
 public class App
@@ -26,8 +27,8 @@ public class App
      */
     @SuppressWarnings("unchecked")
     private static void testArithmaticOperations() {
-        try {
-            NumJ numj = new NumJ<>();
+        NumJ numj = new NumJ<>();
+
 //            NDArray<Integer> arr = numj.arange(100);
 //            arr.printArray();
 //            NDArray<Integer> arr1 =  arr.reshape(10, 10);
@@ -36,30 +37,29 @@ public class App
 //            NDArray<Number> arrayB = numj.arange(size, 100, 10000);
 
 //            long t1 = System.currentTimeMillis();
-            Number[][] dataA = {
-                    {30, 20, 10L},
-                    {1, 2, 3},
-                    {4, 5, 6.0}
-            };
-            NDArray<Number> arrayA = numj.array(dataA);
-            arrayA.printArray();
-            Object[][][] dataB = {
-                    {{10, 20, 30}},
-                    {{40, 50, 60}}
-            };
-            NDArray<Number> arrayB = numj.array(dataB);
-            arrayB.printArray();
-            NDArray<?> resultArray = numj.add(arrayA, arrayB);
-
-            System.out.println("Resultant Array after Addition:");
-            resultArray.printArray();
-        } catch (ShapeException e) {
-            e.printStackTrace();
-        }
+//            Number[][] dataA = {
+//                    {30, 20, 10L},
+//                    {1, 2, 3},
+//                    {4, 5, 6.0}
+//            };
+//            NDArray<Number> arrayA = numj.array(dataA);
+//            arrayA.printArray();
+//            Object[][][] dataB = {
+//                    {{10, 20, 30}},
+//                    {{40, 50, 60}}
+//            };
+//            NDArray<Number> arrayB = numj.array(dataB);
+//            arrayB.printArray();
+//            NDArray<?> resultArray = numj.add(arrayA, arrayB);
+//
+//            System.out.println("Resultant Array after Addition:");
+//            resultArray.printArray();
     }
     private static void testArrayCreationOperations() throws ShapeException {
         NumJ numJ = new NumJ();
-        NDArray arr  = numJ.arange(10, 101, 9);
-        arr.printArray();
+        NDArray zeros = numJ.zeros(new int[]{3, 2}, DType.FLOAT32);
+        zeros.printArray();
+//        NDArray arr  = numJ.arange(10, 101, 9);
+//        arr.printArray();
     }
 }

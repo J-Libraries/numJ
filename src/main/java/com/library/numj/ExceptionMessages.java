@@ -71,8 +71,18 @@ public final class ExceptionMessages {
 	public static String illegalDataType(DType dType) {
 		return "IllegalArgumentException : Data type you have provided is not supported: " + dType;
 	}
-	public static String shapeMismatchException(int size, int...shape)
-	{
-		return "ShapeMismatchException : The provided shape:"+ Arrays.toString(shape) +" is not matching with provided size: "+size;
+
+	/**
+	 * Generates a detailed message for a shape mismatch exception.
+	 *
+	 * @param size The expected size of the array.
+	 * @param shape The provided shape of the array.
+	 * @return A formatted message indicating the shape mismatch.
+	 */
+	public static String shapeMismatchException(int size, int... shape) {
+		return "ShapeMismatchException: The provided shape: " + Arrays.toString(shape) +
+				" is not matching with the provided size: " + size;
 	}
+
+
 }

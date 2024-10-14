@@ -23,7 +23,7 @@ public final class NDArray<T> {
 	/** The number of dimensions of the array. */
 	private int ndim;
 	/** The shape of the array, represented as a list of integers. */
-	private final List<Integer> shape = new ArrayList<>();
+	private List<Integer> shape = new ArrayList<>();
 	/** The total number of elements in the array. */
 	private long size = 0;
 	/** The total size in bytes of the array elements. */
@@ -44,6 +44,25 @@ public final class NDArray<T> {
 		this.array = (T) Array.newInstance(Integer.class, arrayShape);
 		this.array = createDeepCopy(data);
 	}
+	/**
+	 * Constructs an NDArray with the given data, shape, and number of dimensions.
+	 *
+	 * @param data  The data to be stored in the NDArray.
+	 * @param shape The shape of the NDArray as an array of integers.
+	 * @param ndim  The number of dimensions of the NDArray.
+	 */
+	public NDArray(T data, int[] shape, int ndim) {
+		this.array = data;
+		Arrays.stream(shape).sequential().forEach(value -> this.shape.add(value));
+		this.ndim = ndim;
+	}
+
+	/**
+	 * Creates a deep copy of the given array, including nested arrays, using recursion.
+	 *
+	 * @param array The array to be copied.
+	 * @return A deep copy of the array.
+	 */
 	@SuppressWarnings("unchecked")
 	private T createDeepCopy(T array) {
 		if (!array.getClass().isArray()) {
@@ -64,9 +83,9 @@ public final class NDArray<T> {
 				Array.set(newArray, i, element);
 			}
 		});
-
 		return newArray;
 	}
+
 
 	/**
 	 * Calculates the total size and item size of the array based on its shape.
