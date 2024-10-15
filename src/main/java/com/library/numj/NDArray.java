@@ -136,28 +136,30 @@ public final class NDArray<T> {
 		IntStream.range(0, length).sequential().forEach(i -> {
 			Object element = Array.get(arr, i);
 
-			if (element != null && element.getClass().isArray()) {
-				if (previousClass != null && previousClass.isArray()) {
-					try {
+			try{
+				if (element != null && element.getClass().isArray()) {
+					if (previousClass != null && previousClass.isArray()) {
 						int dim = calculateDimensions(element, level + 1);
 						synchronized (this) {
 							if (i == 0) {
 								previousDim.set(dim);
 							} else if (dim != previousDim.get()) {
-								throw new ShapeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
+								throw new ShapeException(ExceptionMessages.getShapeException(ndim, shape));
 							}
 						}
-					} catch (ShapeException e) {
-						throw new ShapeException(e);
+					} else {
+						throw new ShapeException(ExceptionMessages.getShapeException(ndim, shape));
 					}
 				} else {
-					throw new ShapeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
+					if (previousClass != null && previousClass.isArray()) {
+						throw new ShapeException(ExceptionMessages.getShapeException(ndim, shape));
+					}
 				}
-			} else {
-				if (previousClass != null && previousClass.isArray()) {
-					throw new ShapeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
-				}
+			}catch (ShapeException e)
+			{
+				throw new RuntimeException(e);
 			}
+			
 		});
 
 		return ndim;
