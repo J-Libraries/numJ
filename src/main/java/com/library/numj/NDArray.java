@@ -144,18 +144,18 @@ public final class NDArray<T> {
 							if (i == 0) {
 								previousDim.set(dim);
 							} else if (dim != previousDim.get()) {
-								throw new RuntimeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
+								throw new ShapeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
 							}
 						}
 					} catch (ShapeException e) {
-						throw new RuntimeException(e);
+						throw new ShapeException(e);
 					}
 				} else {
-					throw new RuntimeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
+					throw new ShapeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
 				}
 			} else {
 				if (previousClass != null && previousClass.isArray()) {
-					throw new RuntimeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
+					throw new ShapeException(new ShapeException(ExceptionMessages.getShapeException(ndim, shape)));
 				}
 			}
 		});
