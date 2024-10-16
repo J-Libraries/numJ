@@ -19,7 +19,7 @@ import static com.library.numj.ExceptionMessages.unsupportedOperation;
  * @param <T> The type of elements in the NDArray.
  */
 @SuppressWarnings("unchecked")
-public class ArithmaticOperations<T> extends NumJ<T> {
+public class ArithmaticOperations<T> {
     /** Utility instance for helper methods like broadcasting and indexing. */
     Utils<T> utils;
 
@@ -115,7 +115,7 @@ public class ArithmaticOperations<T> extends NumJ<T> {
         });
 
         // Construct and return the result NDArray with the broadcasted shape
-        return array((T) outputArray).reshape(broadcastedShape);
+        return  new NumJ<R>().array((R) outputArray).reshape(broadcastedShape);
     }
 
     /**
