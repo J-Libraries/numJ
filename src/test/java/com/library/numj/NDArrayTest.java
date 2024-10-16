@@ -27,33 +27,30 @@ class NDArrayTest {
         Integer[][][] data = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
         try {
             array = new NDArray<>(data);
-        }catch (ShapeException ignored) {
+        } catch (ShapeException ignored) {
 
         }
     }
 
     @Test
-    public void testValidConstruction()
-    {
+    public void testValidConstruction() {
         assertNotNull(array);
-        assertEquals(3 , array.ndim());
-        assertEquals(Arrays.asList(2,2,2) , array.shape());
-        assertEquals(8L , array.size());
+        assertEquals(3, array.ndim());
+        assertEquals(Arrays.asList(2, 2, 2), array.shape());
+        assertEquals(8L, array.size());
 
         Integer[][][] expectedData = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
-        assertArrayEquals(expectedData , (Integer[][][])array.getArray());
+        assertArrayEquals(expectedData, (Integer[][][]) array.getArray());
     }
 
     @Test
-    public void testShapeExceptionInConstructor()
-    {
+    public void testShapeExceptionInConstructor() {
         Integer[][][] invalidData = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}, {9, 10}}};
-        assertThrows(ShapeException.class , () -> new NDArray<>(invalidData) );
+        assertThrows(ShapeException.class, () -> new NDArray<>(invalidData));
     }
 
     @Test
-    public void testFlatten() throws ShapeException
-    {
+    public void testFlatten() throws ShapeException {
         NDArray<Integer[]> flatArray = array.flatten();
         assertEquals(1, flatArray.ndim());
         assertEquals(8L, flatArray.size());
@@ -65,5 +62,82 @@ class NDArrayTest {
         // Expected flattened data
         Integer[] expectedFlattenedData = {1, 2, 3, 4, 5, 6, 7, 8};
         assertArrayEquals(expectedFlattenedData, result);
+    }
+
+    @Test
+    public void testReshapeToLowerDimension() throws ShapeException {
+        int[] newShape = {4, 2};
+        NDArray<Integer[][]> reshapedArray = array.reshape(newShape);
+        assertEquals(2, reshapedArray.ndim());
+        assertEquals(Arrays.asList(4, 2), reshapedArray.shape());
+        assertEquals(8L, reshapedArray.size());
+        Integer[][] expectedReshapedData = {
+                {1, 2}, {3, 4}, {5, 6}, {7, 8}
+        };
+        assertArrayEquals(expectedReshapedData, (Integer[][]) reshapedArray.getArray());
+    }
+
+    @Test
+    public void testReshapeToHigherDimension() throws ShapeException {
+        NDArray<Integer[][]> reshaped = array.reshape(2, 4);
+        assertEquals(2, reshaped.ndim());
+        assertEquals(Arrays.asList(2, 4), reshaped.shape());
+        assertEquals(8L, reshaped.size());
+
+        Integer[][] expectedReshapedData = {{1, 2, 3, 4}, {5, 6, 7, 8}};
+        assertArrayEquals(expectedReshapedData, (Integer[][]) reshaped.getArray());
+    }
+
+    @Test
+    public void testReshapeToSingleDimension() throws ShapeException {
+        int[] newShape = {8};
+        NDArray<Integer[]> reshapedArray = array.reshape(newShape);
+        assertEquals(1, reshapedArray.ndim());
+        assertEquals(Arrays.asList(8), reshapedArray.shape());
+        assertEquals(8L, reshapedArray.size());
+
+        Integer[] expectedReshapedData = {1, 2, 3, 4, 5, 6, 7, 8};
+        assertArrayEquals(expectedReshapedData, (Integer[]) reshapedArray.getArray());
+    }
+
+    @Test
+    public void testInvalidReshapeTotalSizeMismatch() {
+        int[] invalidShape = {0}; // Invalid shape with zero elements
+        assertThrows(ShapeException.class, () -> array.reshape(invalidShape));
+    }
+
+    @Test
+    public void testReshapeBackToOriginalDimensions() throws ShapeException {
+        int[] originalShape = {2 , 2 , 2};
+        NDArray<Integer[][][]> reshapedArray = array.reshape(originalShape);
+        assertEquals(3 , reshapedArray.ndim());
+        assertEquals(Arrays.asList(2 , 2 , 2) , reshapedArray.shape());
+        assertEquals(8L , reshapedArray.size());
+
+        Integer[][][] expectedReshapedData = {{{1 , 2} , {3 , 4}} , {{5 , 6} , {7 , 8}}};
+        assertArrayEquals(expectedReshapedData , (Integer[][][])reshapedArray.getArray());
+    }
+
+    /*@Test
+    public void testReshapeToDifferentHigherDimension() throws ShapeException {
+        int[] newShape = {4, 2, 2, 2};
+        NDArray<Integer[][][][]> reshapedArray = array.reshape(newShape);
+        assertEquals(4, reshapedArray.ndim());
+        assertEquals(Arrays.asList(4, 2, 2, 2), reshapedArray.shape());
+        assertEquals(16L, reshapedArray.size());
+        Integer[][][][] expectedReshapedData = {
+                {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}},
+                {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}},
+                {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}},
+                {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}}
+        };
+        assertArrayEquals(expectedReshapedData, (Integer[][][][])
+                reshapedArray.getArray());
+    }*/
+
+    @Test
+    public void testReshapeToEmptyDimension() throws ShapeException {
+        int[] newShape = {0, 2, 2};
+        assertThrows(ShapeException.class, () -> array.reshape(newShape));
     }
 }
