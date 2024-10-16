@@ -26,12 +26,12 @@ public enum DType {
 	/** Mapping between DType and corresponding Java class types. */
 	static Map<DType, Class<?>> map = new HashMap<>();
 	static {
-		map.put(FLOAT32, Float.class);
-		map.put(FLOAT64, Double.class);
-		map.put(INT8, Byte.class);
-		map.put(INT16, Short.class);
-		map.put(INT32, Integer.class);
-		map.put(INT64, Long.class);
+		map.put(FLOAT32, float.class);
+		map.put(FLOAT64, double.class);
+		map.put(INT8, byte.class);
+		map.put(INT16, short.class);
+		map.put(INT32, int.class);
+		map.put(INT64, long.class);
 	}
 
 	/**

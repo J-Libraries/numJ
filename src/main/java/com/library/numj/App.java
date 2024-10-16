@@ -4,6 +4,7 @@
  */
 package com.library.numj;
 
+import com.library.numj.enums.DType;
 import com.library.numj.exceptions.ShapeException;
 
 import java.util.Arrays;
@@ -63,11 +64,16 @@ public class App
                         {11,12}
                 }
         };
-        NDArray<Integer[][][]> arr = numJ.array(arrayData);
-        NDArray<Integer[][]> arr1 = arr.reshape(2, 9);
-        arr.printArray();
-        arr1.printArray();
-        NDArray<Integer[][][]> ndArray = numJ.zeros(new int[]{3,6});
-        ndArray.printArray();
+//        NDArray<Integer[][][]> arr = numJ.array(arrayData);
+//        NDArray<Integer[][]> arr1 = arr.reshape(2, 9);
+//        arr.printArray();
+//        arr1.printArray();
+//        NDArray<Integer[][][]> ndArray = numJ.zeros(new int[]{3,6});
+//        ndArray.printArray();
+        long t1 = System.currentTimeMillis();
+       numJ.eye(10000, 10000).flatten();
+//       numJ.eye(3, 3, -1);
+       long t2 = System.currentTimeMillis();
+        System.out.println("Time -> "+(t2-t1));
     }
 }

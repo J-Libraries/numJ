@@ -85,4 +85,30 @@ public final class ExceptionMessages {
 	}
 
 
+	/**
+	 * Generates an exception message indicating that the identity diagonal index
+	 * is greater than the number of columns in the matrix.
+	 *
+	 * @param cols            The number of columns in the matrix.
+	 * @param identityDiagonal The specified identity diagonal index.
+	 * @return A formatted exception message.
+	 */
+	public static String diagonalGreaterThanColsException(int cols, int identityDiagonal) {
+		return "IllegalArgumentException: identityDiagonal " + identityDiagonal +
+				" could not be greater than the number of columns " + cols;
+	}
+
+	/**
+	 * Generates an exception message indicating that the identity diagonal index
+	 * is smaller than the number of rows in the matrix.
+	 *
+	 * @param rows            The number of rows in the matrix.
+	 * @param identityDiagonal The specified identity diagonal index.
+	 * @return A formatted exception message.
+	 */
+	public static String diagonalLessThanRowsException(int rows, int identityDiagonal) {
+		return "IllegalArgumentException: identityDiagonal " + identityDiagonal +
+				" could not be smaller than the number of rows " + rows;
+	}
+
 }
