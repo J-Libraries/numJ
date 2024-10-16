@@ -99,4 +99,13 @@ public final class Utils<T> {
         }
         return flatIndex;
     }
+    public Class<?> getComponentType(T array)
+    {
+        Class<?> componenetType = array.getClass().getComponentType();
+        while (componenetType.isArray())
+        {
+            componenetType = componenetType.getComponentType();
+        }
+        return componenetType;
+    }
 }

@@ -1,5 +1,6 @@
 package com.library.numj;
 
+import com.library.numj.enums.DType;
 import com.library.numj.exceptions.ShapeException;
 
 import java.lang.reflect.Array;
@@ -26,8 +27,11 @@ public final class NDArray<T> {
 	private List<Integer> shape = new ArrayList<>();
 	/** The total number of elements in the array. */
 	private long size = 0;
-	/** The total size in bytes of the array elements. */
+	/** The total size of the array elements. */
 	private long itemSize = 0;
+	/** The total number of bytes of array elements*/
+	private long nBytes = 0;
+	private int index = 0;
 	/** Utility class instance for helper methods. */
 	Utils<T> utils;
 	/**
@@ -51,10 +55,24 @@ public final class NDArray<T> {
 	 * @param shape The shape of the NDArray as an array of integers.
 	 * @param ndim  The number of dimensions of the NDArray.
 	 */
-	public NDArray(T data, int[] shape, int ndim) {
+	NDArray(T data, int[] shape, int ndim, DType dType) {
 		this.array = data;
-		Arrays.stream(shape).sequential().forEach(value -> this.shape.add(value));
+		utils = new Utils<>();
+		Arrays.stream(shape).sequential().forEach(value -> {
+			this.shape.add(value);
+			this.size *= value;
+			if(this.size == 0)
+			{
+				this.size = value;
+			}
+			else{
+				this.size *= value;
+			}
+		});
+		this.itemSize = this.size + ndim;
 		this.ndim = ndim;
+		this.nBytes = this.itemSize * utils.getElementSize(dType.is());
+
 	}
 
 	/**
@@ -66,7 +84,7 @@ public final class NDArray<T> {
 	@SuppressWarnings("unchecked")
 	private T createDeepCopy(T array) {
 		if (!array.getClass().isArray()) {
-			return array;  // Not an array, return as is
+			return array;
 		}
 
 		int length = Array.getLength(array);
@@ -222,15 +240,19 @@ public final class NDArray<T> {
 	 * Recursively flattens the array into a one-dimensional list.
 	 *
 	 * @param currentArray The current sub-array being processed.
-	 * @param flatList     The list to accumulate the flattened elements.
+	 * @param flatArray     The list to accumulate the flattened elements.
 	 */
-	private void flattenRecursive(T currentArray, List<Object> flatList) {
+
+	private <R> void flattenRecursive(T currentArray, R flatArray, int level) {
+
 		if (currentArray.getClass().isArray()) {
+			final int finalLevel = level+1;
 			Arrays.stream(((T[])currentArray)).sequential()
-					.forEach(element ->flattenRecursive(element, flatList));
+					.forEach(element -> flattenRecursive(element, flatArray, finalLevel));
 
 		} else {
-			flatList.add(currentArray);
+			Array.set(flatArray, index++, currentArray);
+
 		}
 	}
 
@@ -240,61 +262,11 @@ public final class NDArray<T> {
 	 * @return A new NDArray that is a flattened version of the original array.
 	 * @throws ShapeException If an error occurs during flattening.
 	 */
-	@SuppressWarnings("rawtypes")
-	public NDArray flatten() throws ShapeException {
-		List<Object> flatList = new CopyOnWriteArrayList<>();
-		flattenRecursive(this.array, flatList);
-		Object[] flattenedArray = flatList.toArray(new Object[0]);
-		return new NDArray(flattenedArray);
-	}
-
-	/**
-	 * Transposes the array by reversing its axes.
-	 *
-	 * @return A new NDArray that is the transposed version of the original array.
-	 * @throws ShapeException If an error occurs during transposition.
-	 */
-	public NDArray<T> transpose() throws ShapeException {
-		int[] axes = new int[ndim];
-		for (int i = 0; i < ndim; i++) {
-			axes[i] = ndim - 1 - i;
-		}
-		Object transposedArray = transposeRecursive(array, axes, new int[0]);
-		return new NDArray<>((T) transposedArray);
-	}
-
-	/**
-	 * Recursively transposes the array based on the provided axes.
-	 *
-	 * @param arr            The array to transpose.
-	 * @param axes           The order of axes for transposition.
-	 * @param currentIndices The current indices during recursion.
-	 * @return The transposed array.
-	 * @throws ShapeException If an error occurs during transposition.
-	 */
-	private Object transposeRecursive(Object arr, int[] axes, int[] currentIndices) throws ShapeException {
-		if (currentIndices.length == ndim) {
-			int[] originalIndices = new int[ndim];
-			for (int i = 0; i < ndim; i++) {
-				originalIndices[i] = currentIndices[axes[i]];
-			}
-			Object element = array;
-			for (int idx : originalIndices) {
-				element = Array.get(element, idx);
-			}
-			return element;
-		} else {
-			int axis = currentIndices.length;
-			int dimSize = shape.get(axes[axis]);
-			Object[] newArr = new Object[dimSize];
-			for (int i = 0; i < dimSize; i++) {
-				int[] newIndices = Arrays.copyOf(currentIndices, currentIndices.length + 1);
-				newIndices[currentIndices.length] = i;
-				Object value = transposeRecursive(arr, axes, newIndices);
-				newArr[i] = value;
-			}
-			return newArr;
-		}
+	public <R> NDArray<R> flatten() throws ShapeException {
+		R flatArray = (R) new Object[(int) this.size];
+		flattenRecursive(this.array, flatArray, 0);
+		this.index = 0;
+		return new NDArray<>(flatArray);
 	}
 
 	/**
@@ -304,43 +276,45 @@ public final class NDArray<T> {
 	 * @return A new NDArray with the specified shape.
 	 * @throws ShapeException If the total size does not match the original array.
 	 */
-	public NDArray<T> reshape(int... newShape) throws ShapeException {
-		long newSize = 1;
-		for (int dim : newShape) {
-			newSize *= dim;
-		}
+	public <R> NDArray<R> reshape(int... newShape) throws ShapeException {
+		long newSize = Arrays.stream(newShape)
+				.asLongStream()
+				.reduce(1, (a, b) -> a * b);
+
 		if (this.size != newSize) {
 			throw new ShapeException(ExceptionMessages.shapeMismatchedException(size, Arrays.toString(newShape)));
 		}
-		List<Object> flatList = new CopyOnWriteArrayList<>();
-		flattenRecursive(this.array, flatList);
-		Object reshapedArray = buildArrayFromFlatList(flatList, newShape, 0);
-		return new NDArray<>((T) reshapedArray);
+		Class<?> arrayOutType = this.array.getClass().getComponentType();
+		while (arrayOutType.isArray()) {
+			arrayOutType = arrayOutType.getComponentType();
+		}
+		R flatList = (R) Array.newInstance(arrayOutType, (int) newSize);
+		flattenRecursive(this.array, flatList, 0);
+		R newArray = (R) Array.newInstance(arrayOutType, newShape);
+		this.index = 0;
+		buildArrayFromFlatList(flatList, newArray);
+
+		return new NDArray<>(newArray);
+
 	}
+
 
 	/**
 	 * Builds a multi-dimensional array from a flat list based on the given shape.
 	 *
 	 * @param flatList The flat list of array elements.
-	 * @param shape    The desired shape of the new array.
-	 * @param depth    The current depth in the recursive construction.
-	 * @return The constructed multi-dimensional array.
+	 * @param newArray The desired new array to fill the values.
 	 */
-	private Object buildArrayFromFlatList(List<Object> flatList, int[] shape, int depth) {
-		int size = shape[depth];
-		Object[] array = new Object[size];
-		if (depth == shape.length - 1) {
-			for (int i = 0; i < size; i++) {
-				Array.set(array, i, flatList.remove(0));
-			}
+	private <R> void buildArrayFromFlatList(R flatList, R newArray) {
+		if (Array.get(newArray, 0) != null && Array.get(newArray, 0).getClass().isArray()) {
+			IntStream.range(0, Array.getLength(newArray))
+					.forEach(i -> buildArrayFromFlatList(flatList, Array.get(newArray, i)));
 		} else {
-			for (int i = 0; i < size; i++) {
-				Object subArray = buildArrayFromFlatList(flatList, shape, depth + 1);
-				Array.set(array, i, subArray);
-			}
+			IntStream.range(0, Array.getLength(newArray))
+					.forEach(i -> Array.set(newArray, i, Array.get(flatList, index++)));
 		}
-		return array;
 	}
+
 
 	/**
 	 * Calculates the strides of the array based on the given shape.

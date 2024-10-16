@@ -1,6 +1,7 @@
 package com.library.numj.operations;
 
 import com.library.numj.NDArray;
+import com.library.numj.NumJ;
 import com.library.numj.enums.DType;
 
 import java.lang.reflect.Array;
@@ -10,7 +11,8 @@ import java.util.stream.IntStream;
  * The ArrayCreation class provides methods to create NDArray objects filled with zeros or ones.
  * It supports recursive filling of multi-dimensional arrays.
  */
-public class ArrayCreation {
+@SuppressWarnings("unchecked")
+public class ArrayCreation<T> {
 
     /**
      * Recursively fills an array with the specified value based on the given data type.
@@ -21,16 +23,16 @@ public class ArrayCreation {
      * @param value  The value to fill in the array.
      * @return The filled array.
      */
-    private static Object fillRecursive(Object array, DType dType, double value) {
-        if (!array.getClass().isArray()) return array;  // Base case: if it's not an array, return as is.
+    private T fillRecursive(T array, DType dType, double value) {
+        if (!array.getClass().isArray()) return array;
 
         int length = Array.getLength(array);
         IntStream.range(0, length).forEach(index -> {
-            Object element = Array.get(array, index);
+            T element = (T) Array.get(array, index);
             if (element == null) {
-                dType.set((Object[]) array, index, value);  // Set the value if the element is null.
+                dType.set(array, index, value);
             } else {
-                fillRecursive(Array.get(array, index), dType, value);  // Recursively fill nested arrays.
+                fillRecursive((T) Array.get(array, index), dType, value);
             }
         });
         return array;
@@ -43,9 +45,9 @@ public class ArrayCreation {
      * @param dType The data type of the array elements.
      * @return An NDArray filled with zeros.
      */
-    public static NDArray zeros(int[] shape, DType dType) {
-        Object array = Array.newInstance(dType.is(), shape);
-        return new NDArray<>(fillRecursive(array, dType, 0), shape, shape.length);
+    public NDArray<T> zeros(int[] shape, DType dType) {
+        T array = (T) Array.newInstance(dType.is(), shape);
+        return new NumJ<T>().array(fillRecursive(array, dType, 0), shape, shape.length, dType);
     }
 
     /**
@@ -55,8 +57,8 @@ public class ArrayCreation {
      * @param dType The data type of the array elements.
      * @return An NDArray filled with ones.
      */
-    public static NDArray ones(int[] shape, DType dType) {
-        Object array = Array.newInstance(dType.is(), shape);
-        return new NDArray<>(fillRecursive(array, dType, 1), shape, shape.length);
+    public NDArray<T> ones(int[] shape, DType dType) {
+        T array = (T) Array.newInstance(dType.is(), shape);
+        return new NumJ<T>().array(fillRecursive(array, dType, 1), shape, shape.length, dType);
     }
 }

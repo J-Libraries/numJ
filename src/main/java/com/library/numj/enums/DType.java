@@ -50,7 +50,7 @@ public enum DType {
 	 * @param index The index at which the value should be set.
 	 * @param value The value to set, which will be cast based on the DType.
 	 */
-	public void set(Object[] array, int index, double value) {
+	public <T> void set(T array, int index, double value) {
 		switch (this) {
 			case INT8:
 				Array.set(array, index, (byte) value);
