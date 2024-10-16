@@ -7,6 +7,7 @@ import com.library.numj.exceptions.ShapeException;
 import com.library.numj.exceptions.ShapeMismatchException;
 import com.library.numj.operations.ArithmaticOperations;
 import com.library.numj.operations.ArrayCreation;
+import com.library.numj.operations.ArrayModification;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -23,12 +24,16 @@ import static com.library.numj.ExceptionMessages.shapeMismatchException;
 public class NumJ<T> {
 	/** Instance of ArithmaticOperations for performing arithmetic operations on NDArrays. */
 	ArithmaticOperations<T> arithmaticOperations;
+	ArrayModification<T> arrayModification;
+	ArrayCreation<T> arrayCreation;
 
 	/**
 	 * Default constructor initializes the arithmetic operations.
 	 */
 	public NumJ(){
 		arithmaticOperations = new ArithmaticOperations<>();
+		arrayModification = new ArrayModification<>();
+		arrayCreation = new ArrayCreation<>();
 	}
 
 	/**
@@ -38,8 +43,12 @@ public class NumJ<T> {
 	 * @return An NDArray containing the provided data.
 	 * @throws ShapeException If the data cannot be converted into an NDArray due to shape issues.
 	 */
-	public NDArray<T> array(T data) throws ShapeException{
-		return new NDArray<>(data);
+	public <R>NDArray<R> array(T data) throws ShapeException{
+		return (NDArray<R>) new NDArray<>(data);
+	}
+	public <R> NDArray<R> array(T data, int[] shape, int ndim, DType dType)
+	{
+		return (NDArray<R>) new NDArray<>(data, shape, ndim, dType);
 	}
 
 
@@ -49,7 +58,7 @@ public class NumJ<T> {
 	 * @param shape The shape of the NDArray.
 	 * @return An NDArray filled with zeros.
 	 */
-	public NDArray<Number> zeros(int[] shape) {
+	public NDArray<T> zeros(int[] shape) {
 		return zeros(shape, DType.INT32, Order.C);
 	}
 
@@ -61,7 +70,7 @@ public class NumJ<T> {
 	 * @param dType The data type of the elements in the NDArray.
 	 * @return An NDArray filled with zeros.
 	 */
-	public NDArray<Number> zeros(int[] shape, DType dType) {
+	public NDArray<T> zeros(int[] shape, DType dType) {
 		return zeros(shape, dType, Order.C);
 	}
 
@@ -73,8 +82,8 @@ public class NumJ<T> {
 	 * @param order The memory layout order, either C (row-major) or F (column-major).
 	 * @return An NDArray filled with zeros.
 	 */
-	public NDArray<Number> zeros(int[] shape, DType dType, Order order) {
-		return ArrayCreation.zeros(shape, dType);
+	public NDArray<T> zeros(int[] shape, DType dType, Order order) {
+		return arrayCreation.zeros(shape, dType);
 	}
 
 	/**
@@ -83,7 +92,7 @@ public class NumJ<T> {
 	 * @param shape The shape of the NDArray.
 	 * @return An NDArray filled with ones.
 	 */
-	public NDArray<Number> ones(int[] shape) {
+	public NDArray<T> ones(int[] shape) {
 		return ones(shape, DType.INT32, Order.C);
 	}
 
@@ -94,7 +103,7 @@ public class NumJ<T> {
 	 * @param dType The data type of the elements in the NDArray.
 	 * @return An NDArray filled with ones.
 	 */
-	public NDArray<Number> ones(int[] shape, DType dType) {
+	public NDArray<T> ones(int[] shape, DType dType) {
 		return ones(shape, dType, Order.C);
 	}
 
@@ -106,8 +115,8 @@ public class NumJ<T> {
 	 * @param order The memory layout order, either C (row-major) or F (column-major).
 	 * @return An NDArray filled with ones.
 	 */
-	public NDArray<Number> ones(int[] shape, DType dType, Order order) {
-		return ArrayCreation.ones(shape, dType);
+	public NDArray<T> ones(int[] shape, DType dType, Order order) {
+		return arrayCreation.ones(shape, dType);
 	}
 
 
@@ -213,7 +222,6 @@ public class NumJ<T> {
 	 * @return An NDArray containing numbers from start to end - 1, cast to the specified data type.
 	 * @throws ShapeException If there is an issue creating the NDArray.
 	 */
-	@SuppressWarnings("unchecked")
 	public NDArray<T> arange(int start, int end, DType dType, int[] shape) throws ShapeException {
 		return arange(start, end, dType, 0, shape);
 	}
@@ -273,7 +281,7 @@ public class NumJ<T> {
 	 * @throws ShapeException If the shapes of arr1 and arr2 are not compatible for broadcasting.
 	 */
 	public NDArray<T> add(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
-		return (NDArray<T>) arithmaticOperations.operate(arr1, arr2, OperationType.ADDITION);
+		return arithmaticOperations.operate(arr1, arr2, OperationType.ADDITION);
 	}
 
 	/**
@@ -285,7 +293,7 @@ public class NumJ<T> {
 	 * @throws ShapeException If the shapes of arr1 and arr2 are not compatible for broadcasting.
 	 */
 	public NDArray<T> subtract(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
-		return (NDArray<T>) arithmaticOperations.operate(arr1, arr2, OperationType.SUBTRACTION);
+		return arithmaticOperations.operate(arr1, arr2, OperationType.SUBTRACTION);
 	}
 
 	/**
@@ -297,7 +305,7 @@ public class NumJ<T> {
 	 * @throws ShapeException If the shapes of arr1 and arr2 are not compatible for broadcasting.
 	 */
 	public NDArray<T> multiply(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
-		return (NDArray<T>) arithmaticOperations.operate(arr1, arr2, OperationType.MULTIPLICATION);
+		return arithmaticOperations.operate(arr1, arr2, OperationType.MULTIPLICATION);
 	}
 
 	/**
@@ -309,6 +317,10 @@ public class NumJ<T> {
 	 * @throws ShapeException If the shapes of arr1 and arr2 are not compatible for broadcasting.
 	 */
 	public NDArray<T> divide(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException {
-		return (NDArray<T>) arithmaticOperations.operate(arr1, arr2, OperationType.DIVISION);
+		return arithmaticOperations.operate(arr1, arr2, OperationType.DIVISION);
+	}
+
+	public <R> NDArray<R> transpose(NDArray<T> array) throws ShapeException {
+		return arrayModification.transpose(array);
 	}
 }

@@ -6,6 +6,9 @@ import com.library.numj.Utils;
 import com.library.numj.enums.OperationType;
 import com.library.numj.exceptions.ShapeException;
 
+import java.util.Arrays;
+import java.util.stream.IntStream;
+
 import static com.library.numj.ExceptionMessages.unsupportedOperation;
 
 /**
@@ -16,7 +19,7 @@ import static com.library.numj.ExceptionMessages.unsupportedOperation;
  * @param <T> The type of elements in the NDArray.
  */
 @SuppressWarnings("unchecked")
-public class ArithmaticOperations<T> {
+public class ArithmaticOperations<T> extends NumJ<T> {
     /** Utility instance for helper methods like broadcasting and indexing. */
     Utils<T> utils;
 
@@ -36,18 +39,18 @@ public class ArithmaticOperations<T> {
      * @return A new NDArray containing the result of the operation.
      * @throws ShapeException If the shapes of arr1 and arr2 are incompatible for broadcasting.
      */
-    public NDArray<Object> operate(NDArray<T> arr1, NDArray<T> arr2, OperationType operation) throws ShapeException {
+    public <R> NDArray<R> operate(NDArray<T> arr1, NDArray<T> arr2, OperationType operation) throws ShapeException {
         // Compute broadcasted shape
         int[] broadcastedShape = utils.broadcastShapes(arr1.shape(), arr2.shape());
 
         // Calculate total number of elements in the result
-        long totalElementsLong = 1;
-        for (int dim : broadcastedShape) {
-            totalElementsLong *= dim;
-            if (totalElementsLong > Integer.MAX_VALUE) {
-                throw new ShapeException("Total number of elements exceeds the maximum allowed size.");
-            }
-        }
+        long totalElementsLong = Arrays.stream(broadcastedShape).reduce(1, (a, b) -> a*b);
+        //        for (int dim : broadcastedShape) {
+//            totalElementsLong *= dim;
+//            if (totalElementsLong > Integer.MAX_VALUE) {
+//                throw new ShapeException("Total number of elements exceeds the maximum allowed size.");
+//            }
+//        }
         // Get strides for indexing
         int[] arr1Strides = arr1.strides();
         int[] arr2Strides = arr2.strides();
@@ -69,8 +72,8 @@ public class ArithmaticOperations<T> {
         int arr2Offset = broadcastedShape.length - arr2.shape().size();
 
         // Perform the operation element-wise
-        for (int i = 0; i < totalElements; i++){
-//            IntStream.range(0, totalElements).parallel().forEach(i ->{
+//        for (int i = 0; i < totalElements; i++){
+            IntStream.range(0, totalElements).forEach(i ->{
             // Compute multi-dimensional indices for broadcasting
             int[] multiDimIndices = utils.getMultiDimIndices(i, broadcastedShape);
 
@@ -109,10 +112,10 @@ public class ArithmaticOperations<T> {
             } else {
                 outputArray[i] = stringOperation(flatArr1[arr1FlatIndex].toString(), flatArr2[arr2FlatIndex].toString(), operation);
             }
-        }
+        });
 
         // Construct and return the result NDArray with the broadcasted shape
-        return new NumJ().array(outputArray).reshape(broadcastedShape);
+        return array((T) outputArray).reshape(broadcastedShape);
     }
 
     /**
