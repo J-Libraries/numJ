@@ -18,11 +18,12 @@ public class App
      */
     public static void main( String[] args ) throws ShapeException {
         System.out.println( "Hello World!" );
+//        int[] arr = new int[10];
         testArrayCreationOperations();
     }
     private static void testArrayCreationOperations() throws ShapeException {
-        NumJ<Integer[][][]> numJ = new NumJ();
-        Integer[][][] arrayData = {
+        NumJ<int[][][]> numJ = new NumJ();
+        int[][][] arrayData = {
                 {
                         {2,5},
                         {4,6},
@@ -39,13 +40,14 @@ public class App
                         {11,12}
                 }
         };
-        NDArray<Integer[][][]> arr = numJ.array(arrayData);
-        NDArray<Integer[][]> arr1 = arr.reshape(2, 9);
+        NDArray<int[][][]> arr = numJ.array(arrayData);
+        NDArray<int[][]> arr1 = arr.reshape(2, 9);
         arr.printArray();
         arr1.printArray();
-        NDArray<Integer[][][]> ndArray = numJ.zeros(new int[]{3,6});
+        NDArray<int[][][]> ndArray = numJ.zeros(new int[]{3,6});
         ndArray.printArray();
-//        ndArray.flatten();
+        NDArray flatArray = ndArray.flatten();
+        flatArray.printArray();
 //        long t1 = System.currentTimeMillis();
 //       numJ.eye(10000, 10000).flatten();
 ////       numJ.eye(3, 3, -1);
