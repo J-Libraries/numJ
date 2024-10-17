@@ -34,7 +34,7 @@ public class ArrayModification<T> {
     /**
      * Recursively transposes the array based on the provided axes.
      *
-     * @param arr            The array to transpose.
+     * @param array            The array to transpose.
      * @param axes           The order of axes for transposition.
      * @param currentIndices The current indices during recursion.
      * @return The transposed array.
@@ -59,7 +59,7 @@ public class ArrayModification<T> {
             for (int i = 0; i < dimSize; i++) {
                 int[] newIndices = Arrays.copyOf(currentIndices, currentIndices.length + 1);
                 newIndices[currentIndices.length] = i;
-                Object value = transposeRecursive(array, axes, newIndices, type);
+                R value = transposeRecursive(array, axes, newIndices, type);
                 Array.set(newArr, i, value);
             }
             return newArr;

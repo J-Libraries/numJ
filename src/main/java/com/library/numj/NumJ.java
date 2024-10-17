@@ -341,8 +341,8 @@ public class NumJ<T> {
 	 * @throws ShapeException If there is an issue creating the empty NDArray.
 	 */
 	public <R> NDArray<R> empty(int[] shape) throws ShapeException {
-		R array = (R) Array.newInstance(Object.class, shape);
-		return new NDArray<>(array);
+		R array = (R) Array.newInstance(int.class, shape);
+		return new NDArray<>(array, shape, shape.length, DType.INT32);
 	}
 
 	/**

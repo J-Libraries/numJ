@@ -24,14 +24,34 @@ public enum DType {
 	INT64;
 
 	/** Mapping between DType and corresponding Java class types. */
-	static Map<DType, Class<?>> map = new HashMap<>();
+	static Map<DType, Class<?>> typeToClassMap = new HashMap<>();
+	static Map<Integer, DType> sizeToTypeNumericMap = new HashMap<>();
+	static Map<Integer, DType> sizeToTypeFloatingPointMap = new HashMap<>();
 	static {
-		map.put(FLOAT32, float.class);
-		map.put(FLOAT64, double.class);
-		map.put(INT8, byte.class);
-		map.put(INT16, short.class);
-		map.put(INT32, int.class);
-		map.put(INT64, long.class);
+		typeToClassMap.put(FLOAT32, float.class);
+		typeToClassMap.put(FLOAT64, double.class);
+		typeToClassMap.put(INT8, byte.class);
+		typeToClassMap.put(INT16, short.class);
+		typeToClassMap.put(INT32, int.class);
+		typeToClassMap.put(INT64, long.class);
+
+		sizeToTypeNumericMap.put(1, INT8);
+		sizeToTypeNumericMap.put(2, INT16);
+		sizeToTypeNumericMap.put(4, INT32);
+		sizeToTypeNumericMap.put(8, INT64);
+		sizeToTypeFloatingPointMap.put(4, FLOAT32);
+		sizeToTypeFloatingPointMap.put(8, FLOAT64);
+	}
+
+	public DType fromSize(int size, boolean isFloatingPoint){
+		if(isFloatingPoint)
+		{
+			if(sizeToTypeFloatingPointMap.containsKey(size)) return sizeToTypeFloatingPointMap.get(size);
+		}
+		else{
+			if(sizeToTypeNumericMap.containsKey(size)) return  sizeToTypeNumericMap.get(size);
+		}
+		throw new IllegalArgumentException();
 	}
 
 	/**
@@ -40,7 +60,7 @@ public enum DType {
 	 * @return The Java class associated with the DType.
 	 */
 	public Class<?> is() {
-		return map.get(this);
+		return typeToClassMap.get(this);
 	}
 
 	/**
