@@ -34,6 +34,8 @@ public final class NDArray<T> {
 	private int index = 0;
 	/** Utility class instance for helper methods. */
 	Utils<T> utils;
+	/** Data Type of current array */
+	DType dType;
 	/**
 	 * Constructs an NDArray from the given data array.
 	 *
@@ -45,7 +47,7 @@ public final class NDArray<T> {
 		calculateDimensions(data, 0);
 		calculateSize();
 		int[] arrayShape = shape.stream().mapToInt(Integer::intValue).toArray();
-		this.array = (T) Array.newInstance(Integer.class, arrayShape);
+		this.array = (T) Array.newInstance(int.class, arrayShape);
 		this.array = createDeepCopy(data);
 	}
 	/**
@@ -57,6 +59,7 @@ public final class NDArray<T> {
 	 */
 	NDArray(T data, int[] shape, int ndim, DType dType) {
 		this.array = data;
+		this.dType = dType;
 		utils = new Utils<>();
 		Arrays.stream(shape).sequential().forEach(value -> {
 			this.shape.add(value);
@@ -153,7 +156,6 @@ public final class NDArray<T> {
 		// Parallel stream to process the array
 		IntStream.range(0, length).sequential().forEach(i -> {
 			Object element = Array.get(arr, i);
-
 			try{
 				if (element != null && element.getClass().isArray()) {
 					if (previousClass != null && previousClass.isArray()) {

@@ -320,7 +320,121 @@ public class NumJ<T> {
 		return arithmaticOperations.operate(arr1, arr2, OperationType.DIVISION);
 	}
 
+	/**
+	 * Transposes the given NDArray.
+	 *
+	 * @param array The NDArray to be transposed.
+	 * @param <R>   The type of elements in the transposed NDArray.
+	 * @return A new NDArray that is the transposed version of the input array.
+	 * @throws ShapeException If there is an issue during the transposition.
+	 */
 	public <R> NDArray<R> transpose(NDArray<T> array) throws ShapeException {
 		return arrayModification.transpose(array);
 	}
+
+	/**
+	 * Creates an empty NDArray with the specified shape.
+	 *
+	 * @param shape The shape of the NDArray.
+	 * @param <R>   The type of elements in the new NDArray.
+	 * @return A new NDArray of the specified shape, filled with null values.
+	 * @throws ShapeException If there is an issue creating the empty NDArray.
+	 */
+	public <R> NDArray<R> empty(int[] shape) throws ShapeException {
+		R array = (R) Array.newInstance(Object.class, shape);
+		return new NDArray<>(array);
+	}
+
+	/**
+	 * Creates an identity matrix with a specified number of rows and columns,
+	 * using the default data type (INT32) and the main diagonal.
+	 *
+	 * @param rows The number of rows in the identity matrix.
+	 * @param <R>  The type of elements in the NDArray.
+	 * @return A new NDArray representing the identity matrix.
+	 * @throws ShapeException If there is an issue creating the identity matrix.
+	 */
+	public <R> NDArray<R> eye(int rows) throws ShapeException {
+		return eye(rows, rows, 0, DType.INT32);
+	}
+
+	/**
+	 * Creates an identity matrix with a specified number of rows,
+	 * using the specified data type and the main diagonal.
+	 *
+	 * @param rows  The number of rows in the identity matrix.
+	 * @param dType The data type of the elements in the NDArray.
+	 * @param <R>   The type of elements in the NDArray.
+	 * @return A new NDArray representing the identity matrix.
+	 * @throws ShapeException If there is an issue creating the identity matrix.
+	 */
+	public <R> NDArray<R> eye(int rows, DType dType) throws ShapeException {
+		return eye(rows, rows, 0, dType);
+	}
+
+	/**
+	 * Creates an identity matrix with specified rows and columns,
+	 * using the default data type (INT32) and the main diagonal.
+	 *
+	 * @param rows The number of rows in the identity matrix.
+	 * @param cols The number of columns in the identity matrix.
+	 * @param <R>  The type of elements in the NDArray.
+	 * @return A new NDArray representing the identity matrix.
+	 * @throws ShapeException If there is an issue creating the identity matrix.
+	 */
+	public <R> NDArray<R> eye(int rows, int cols) throws ShapeException {
+		return eye(rows, cols, 0, DType.INT32);
+	}
+
+	/**
+	 * Creates an identity matrix with specified rows and columns,
+	 * using the specified data type and the main diagonal.
+	 *
+	 * @param rows  The number of rows in the identity matrix.
+	 * @param cols  The number of columns in the identity matrix.
+	 * @param dType The data type of the elements in the NDArray.
+	 * @param <R>   The type of elements in the NDArray.
+	 * @return A new NDArray representing the identity matrix.
+	 * @throws ShapeException If there is an issue creating the identity matrix.
+	 */
+	public <R> NDArray<R> eye(int rows, int cols, DType dType) throws ShapeException {
+		return eye(rows, cols, 0, dType);
+	}
+
+	/**
+	 * Creates an identity matrix with specified rows, columns, and diagonal offset,
+	 * using the default data type (INT32).
+	 *
+	 * @param rows              The number of rows in the identity matrix.
+	 * @param cols              The number of columns in the identity matrix.
+	 * @param identityDiagonal   The diagonal index of the identity matrix.
+	 * @param <R>               The type of elements in the NDArray.
+	 * @return A new NDArray representing the identity matrix.
+	 * @throws ShapeException If there is an issue creating the identity matrix.
+	 */
+	public <R> NDArray<R> eye(int rows, int cols, int identityDiagonal) throws ShapeException {
+		return eye(rows, cols, identityDiagonal, DType.INT32);
+	}
+
+	/**
+	 * Creates an identity matrix with specified rows, columns, diagonal offset, and data type.
+	 *
+	 * @param rows              The number of rows in the identity matrix.
+	 * @param cols              The number of columns in the identity matrix.
+	 * @param identityDiagonal   The diagonal index of the identity matrix.
+	 * @param dType             The data type of the elements in the NDArray.
+	 * @param <R>               The type of elements in the NDArray.
+	 * @return A new NDArray representing the identity matrix.
+	 * @throws ShapeException If there is an issue creating the identity matrix.
+	 * @throws IllegalArgumentException If the diagonal index exceeds the number of columns or rows.
+	 */
+	public <R> NDArray<R> eye(int rows, int cols, int identityDiagonal, DType dType) throws ShapeException {
+		if (identityDiagonal >= cols)
+			throw new IllegalArgumentException(ExceptionMessages.diagonalGreaterThanColsException(cols, identityDiagonal));
+		if (Math.abs(identityDiagonal) >= rows)
+			throw new IllegalArgumentException(ExceptionMessages.diagonalLessThanRowsException(rows, identityDiagonal));
+		return (NDArray<R>) arrayCreation.eye(rows, cols, identityDiagonal, dType);
+	}
+
+
 }
