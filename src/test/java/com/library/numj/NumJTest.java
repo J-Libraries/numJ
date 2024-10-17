@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,103 +30,141 @@ class NumJTest {
 
     @ParameterizedTest
     @CsvSource({
-            "1, {1}",
-            "2, {2}",
-            "3, {3}"
+            "1, 1",
+            "2, 1",
+            "3, 1"
     })
-    void testArrayCreationWithSingleValue(int value, String expectedShape) throws Exception {
+    void testArrayCreationWithSingleValue(int value, int expectedShape) throws Exception {
         NDArray<Integer> result = numJ.array(value);
-        assertEquals(expectedShape, Arrays.toString(result.shape().toArray()));
+        assertNotNull(result);
+        assertEquals(1, result.ndim());
+        assertEquals(1L, result.size());
+        //assertArrayEquals(new Integer[]{value}, (Integer[]) result.getArray());
+        assertEquals(value, result.getArray());
     }
 
     @ParameterizedTest
     @CsvSource({
-            "1, {1}",
-            "2, {2}",
-            "3, {3}"
+            "1, 2, 2",
+            "2, 3, 3",
+            "3, 4, 4"
     })
-    void testArrayCreationWithShape(int value, String expectedShape) throws Exception {
-        int[] shape = {1};
-        NDArray<Integer> result = numJ.array(value, shape, 1, DType.INT32);
-        assertEquals(expectedShape, Arrays.toString(result.shape().toArray()));
+    void testArrayCreationWithShape(int value, int expectedShape) throws Exception {
+        int[] shape = {expectedShape, expectedShape};
+        NDArray<Integer> result = numJ.array(value, shape, 2, DType.INT32);
+        assertNotNull(result);
+        assertEquals(2, result.ndim());
+        assertArrayEquals(shape, result.shape().stream().mapToInt(Integer::intValue).toArray());
     }
 
-   /* @Test
+    @Test
     void testZerosCreation() throws Exception {
-        assertArrayCreation(numJ.zeros(new int[]{2, 3}), new Integer[]{0, 0, 0, 0, 0, 0});
+        int[] shape = {2, 2};
+        NDArray<Integer> result = numJ.zeros(shape);
+        assertNotNull(result);
+        assertEquals(2, result.ndim());
+        assertArrayEquals(new Integer[]{0, 0, 0, 0}, (Integer[]) result.flatten().getArray());
     }
+
 
     @Test
     void testOnesCreation() throws Exception {
-        assertArrayCreation(numJ.ones(new int[]{2, 3}), new Integer[]{1, 1, 1, 1, 1, 1});
+        int[] shape = {2, 2};
+        NDArray<Integer> result = numJ.ones(shape);
+        assertNotNull(result);
+        assertEquals(2, result.ndim());
+        assertArrayEquals(new Integer[]{1, 1, 1, 1}, (Integer[]) result.flatten().getArray());
     }
+
 
     @ParameterizedTest
     @CsvSource({
-            "0, 5, {5}",
-            "1, 6, {5}",
-            "2, 8, {6}"
+            "0, 5, 5",
+            "1, 6, 5",
+            "2, 8, 6"
     })
-    void testArange(int start, int end, String expectedShape) throws Exception {
-        NDArray<Integer> result = numJ.arange(start, end);
-        assertEquals(expectedShape, Arrays.toString(result.shape()));
-        List<Integer> expectedData = generateExpectedArangeData(start, end);
-        assertEquals(expectedData, Arrays.asList(result.data()));
+    void testArange(int start, int end, int expectedSize) throws Exception {
+        NDArray<Integer[]> result = numJ.arange(start, end);
+        assertNotNull(result);
+        assertEquals(1, result.ndim());
+        assertEquals(expectedSize, result.size());
+        Integer[] expectedData = generateExpectedArangeData(start, end).toArray(new Integer[0]);
+        assertArrayEquals(expectedData, result.getArray());
     }
 
+
     private List<Integer> generateExpectedArangeData(int start, int end) {
-        return Arrays.asList(start, start + 1, start + 2, start + 3, start + 4);
+        List<Integer> data = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            data.add(i);
+        }
+        return data;
     }
+
 
     @Test
     void testArangeWithShapeAndSkip() throws Exception {
-        NDArray<Integer> result = numJ.arange(0, 10, 2, new int[]{3});
-        assertArrayCreation(result, new Integer[]{0, 2, 4});
+        int[] shape = {3};
+        NDArray<Integer[]> result = numJ.arange(0, 6, 2, shape);
+        assertNotNull(result);
+        assertEquals(1, result.ndim());
+        assertEquals(3L, result.size());
+        Integer[] expectedData = {0, 2, 4};
+        assertArrayEquals(expectedData, result.getArray());
     }
 
-    private void assertArrayCreation(NDArray<Integer> result, Integer[] expected) {
+
+    /*private void assertArrayCreation(NDArray<Integer> result, Integer[] expected) {
         assertEquals(expected.length, result.shape()[0]);
         assertArrayEquals(expected, result.data());
-    }
+    }*/
 
     @Test
     void testAddition() throws Exception {
-        NDArray<Integer> arr1 = numJ.array(new int[]{1, 2, 3});
-        NDArray<Integer> arr2 = numJ.array(new int[]{4, 5, 6});
+        Integer[][] data1 = {{1, 2}, {3, 4}};
+        Integer[][] data2 = {{5, 6}, {7, 8}};
+        NDArray<Integer[][]> arr1 = numJ.array(data1);
+        NDArray<Integer[][]> arr2 = numJ.array(data2);
         NDArray<Integer> result = numJ.add(arr1, arr2);
-        assertArrayEquals(new Integer[]{5, 7, 9}, result.data());
+        assertArrayEquals(new Integer[][]{{6, 8}, {10, 12}}, (Integer[][]) result.getArray());
     }
 
     @Test
     void testSubtraction() throws Exception {
-        NDArray<Integer> arr1 = numJ.array(new int[]{5, 5, 5});
-        NDArray<Integer> arr2 = numJ.array(new int[]{3, 3, 3});
+        Integer[][] data1 = {{5, 6}, {7, 8}};
+        Integer[][] data2 = {{1, 2}, {3, 4}};
+        NDArray<Integer[][]> arr1 = numJ.array(data1);
+        NDArray<Integer[][]> arr2 = numJ.array(data2);
         NDArray<Integer> result = numJ.subtract(arr1, arr2);
-        assertArrayEquals(new Integer[]{2, 2, 2}, result.data());
+        assertArrayEquals(new Integer[][]{{4, 4}, {4, 4}}, (Integer[][]) result.getArray());
     }
 
     @Test
     void testMultiplication() throws Exception {
-        NDArray<Integer> arr1 = numJ.array(new int[]{1, 2, 3});
-        NDArray<Integer> arr2 = numJ.array(new int[]{4, 5, 6});
+        Integer[][] data1 = {{1, 2}, {3, 4}};
+        Integer[][] data2 = {{5, 6}, {7, 8}};
+        NDArray<Integer[][]> arr1 = numJ.array(data1);
+        NDArray<Integer[][]> arr2 = numJ.array(data2);
         NDArray<Integer> result = numJ.multiply(arr1, arr2);
-        assertArrayEquals(new Integer[]{4, 10, 18}, result.data());
+        assertArrayEquals(new Integer[][]{{5, 12}, {21, 32}}, (Integer[][]) result.getArray());
     }
 
     @Test
     void testDivision() throws Exception {
-        NDArray<Integer> arr1 = numJ.array(new int[]{10, 20, 30});
-        NDArray<Integer> arr2 = numJ.array(new int[]{2, 4, 6});
+        Integer[][] data1 = {{10, 20}, {30, 40}};
+        Integer[][] data2 = {{2, 2}, {5, 10}};
+        NDArray<Integer[][]> arr1 = numJ.array(data1);
+        NDArray<Integer[][]> arr2 = numJ.array(data2);
         NDArray<Integer> result = numJ.divide(arr1, arr2);
-        assertArrayEquals(new Integer[]{5, 5, 5}, result.data());
+        assertArrayEquals(new Integer[][]{{5, 10}, {6, 4}}, (Integer[][]) result.getArray());
     }
 
     @Test
     void testTranspose() throws Exception {
-        NDArray<Integer> array = numJ.array(new int[]{1, 2, 3, 4});
-        NDArray<Integer> result = numJ.transpose(array);
-        assertEquals(2, result.shape()[0]);
-        assertEquals(2, result.shape()[1]);
-        assertArrayEquals(new Integer[]{1, 2, 3, 4}, result.data());
-    }*/
+        Integer[][] data = {{1, 2}, {3, 4}};
+        NDArray<Integer[][]> arr = numJ.array(data);
+        NDArray<Integer> transposed = numJ.transpose(arr);
+        Integer[][] expected = {{1, 3}, {2, 4}};
+        assertArrayEquals(expected, (Integer[][]) transposed.getArray());
+    }
 }
