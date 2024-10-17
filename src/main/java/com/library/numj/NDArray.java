@@ -7,7 +7,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -225,7 +224,74 @@ public final class NDArray<T> {
 	 * Prints the array in a multi-dimensional format.
 	 */
 	public void printArray() {
-		System.out.println(Arrays.deepToString((T[]) array));
+		printRecurssive(array, 1, false);
+	}
+	public void printArray(boolean isFullArray) {
+		printRecurssive(array, 1, isFullArray);
+	}
+
+	private void printRecurssive(Object array, int depth, boolean isFull) {
+		String indent = getIndent(depth);
+		if(array.getClass().getComponentType().isPrimitive())
+		{
+			System.out.print(indent + "[");
+			int length = Array.getLength(array);
+			if(length > 40 && !isFull) {
+				for(int i = 0;i<10;i++)
+				{
+					if(9 == i ){
+						System.out.print(Array.get(array, i));
+					}
+					else{
+						System.out.print(Array.get(array, i)+", ");
+					}
+				}
+				System.out.print("........");
+				for(int i = length-11;i<length;i++)
+				{
+					if(length-1 == i ){
+						System.out.print(Array.get(array, i));
+					}
+					else{
+						System.out.print(Array.get(array, i)+", ");
+					}
+				}
+			}else {
+				for(int i = 0;i<length;i++)
+				{
+					if(length-1 == i ){
+						System.out.print(Array.get(array, i));
+					}
+					else{
+						System.out.print(Array.get(array, i)+", ");
+					}
+				}
+			}
+
+			System.out.println("],");
+		}
+		else{
+			System.out.println(indent + "[");
+			for(int i = 0;i<Array.getLength(array);i++)
+			{
+				printRecurssive(Array.get(array, i), depth+1, isFull);
+			}
+			int l = Array.getLength(array);
+			if(depth == l-1) {
+				System.out.println(indent + "],");
+			}else{
+				System.out.println(indent + "]");
+			}
+		}
+	}
+
+	// Helper method to create indentation
+	private String getIndent(int depth) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 1; i < depth; i++) { // Start at 1 to skip the top-level
+			sb.append("\t"); // Append a tab for each depth level
+		}
+		return sb.toString(); // Return the indentation string
 	}
 
 	/**
@@ -252,17 +318,20 @@ public final class NDArray<T> {
 	 * @param currentArray The current sub-array being processed.
 	 * @param flatArray     The list to accumulate the flattened elements.
 	 */
-
 	private <R> void flattenRecursive(T currentArray, R flatArray, int level) {
 
 		if (currentArray.getClass().isArray()) {
 			final int finalLevel = level+1;
-			Arrays.stream(((T[])currentArray)).sequential()
+			if(currentArray.getClass().getComponentType().isPrimitive())
+			{
+				for(int i = 0;i<Array.getLength(currentArray);i++)
+				{
+					Array.set(flatArray, index++, Array.get(currentArray, i));
+				}
+			}else{
+                Arrays.stream(((T[])currentArray)).sequential()
 					.forEach(element -> flattenRecursive(element, flatArray, finalLevel));
-
-		} else {
-			Array.set(flatArray, index++, currentArray);
-
+			}
 		}
 	}
 
