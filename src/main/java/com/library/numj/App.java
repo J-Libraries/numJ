@@ -18,32 +18,7 @@ public class App
      */
     public static void main( String[] args ) throws ShapeException {
         System.out.println( "Hello World!" );
-//        int size = (int)Math.pow(10, 9);
-//        int[] a = new int[size];
-//        long t1 = System.currentTimeMillis();
-//        IntStream.range(0, size).forEach(index -> a[index] = 2);
-//        long t2 = System.currentTimeMillis();
-//        for(int i=0;i<size;i++)
-//        {
-//            a[i] = 1;
-//        }
-//        long t3 = System.currentTimeMillis();
-//        Arrays.fill(a, 3);
-//        long t4 = System.currentTimeMillis();
-//        System.out.println("Time : T1 -> "+(t2-t1));
-//        System.out.println("Time : T2 -> "+(t3-t2));
-//        System.out.println("Time : T3 -> "+(t4-t3));
         testArrayCreationOperations();
-    }
-
-    /**
-     * Demonstrates arithmetic operations using the NumJ library.
-     * It creates NDArray objects from data arrays and performs subtraction between them.
-     * The result is printed to the console.
-     */
-    @SuppressWarnings("unchecked")
-    private static void testArithmaticOperations() {
-        NumJ numj = new NumJ<>();
     }
     private static void testArrayCreationOperations() throws ShapeException {
         NumJ<Integer[][][]> numJ = new NumJ();
@@ -64,16 +39,17 @@ public class App
                         {11,12}
                 }
         };
-//        NDArray<Integer[][][]> arr = numJ.array(arrayData);
-//        NDArray<Integer[][]> arr1 = arr.reshape(2, 9);
-//        arr.printArray();
-//        arr1.printArray();
-//        NDArray<Integer[][][]> ndArray = numJ.zeros(new int[]{3,6});
-//        ndArray.printArray();
-        long t1 = System.currentTimeMillis();
-       numJ.eye(10000, 10000).flatten();
-//       numJ.eye(3, 3, -1);
-       long t2 = System.currentTimeMillis();
-        System.out.println("Time -> "+(t2-t1));
+        NDArray<Integer[][][]> arr = numJ.array(arrayData);
+        NDArray<Integer[][]> arr1 = arr.reshape(2, 9);
+        arr.printArray();
+        arr1.printArray();
+        NDArray<Integer[][][]> ndArray = numJ.zeros(new int[]{3,6});
+        ndArray.printArray();
+//        ndArray.flatten();
+//        long t1 = System.currentTimeMillis();
+//       numJ.eye(10000, 10000).flatten();
+////       numJ.eye(3, 3, -1);
+//       long t2 = System.currentTimeMillis();
+//        System.out.println("Time -> "+(t2-t1));
     }
 }

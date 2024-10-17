@@ -16,12 +16,12 @@ public final class Utils<T> {
     /** Map containing the size in bytes of various numeric classes. */
     static Map<Class<?>, Integer> classSizeMap = new HashMap<>();
     static {
-        classSizeMap.put(Integer.class, 4);
-        classSizeMap.put(Long.class, 8);
-        classSizeMap.put(Double.class, 8);
-        classSizeMap.put(Float.class, 4);
-        classSizeMap.put(Short.class, 2);
-        classSizeMap.put(Byte.class, 1);
+        classSizeMap.put(int.class, 4);
+        classSizeMap.put(long.class, 8);
+        classSizeMap.put(double.class, 8);
+        classSizeMap.put(float.class, 4);
+        classSizeMap.put(short.class, 2);
+        classSizeMap.put(byte.class, 1);
     }
 
     /**
