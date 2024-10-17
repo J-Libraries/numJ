@@ -35,7 +35,8 @@ public final class NDArray<T> {
 	/** Utility class instance for helper methods. */
 	Utils<T> utils;
 	/** Data Type of current array */
-	DType dType;
+	DType dType = DType.INT8;
+	int elementSize = 0;
 	/**
 	 * Constructs an NDArray from the given data array.
 	 *
@@ -47,7 +48,7 @@ public final class NDArray<T> {
 		calculateDimensions(data, 0);
 		calculateSize();
 		int[] arrayShape = shape.stream().mapToInt(Integer::intValue).toArray();
-		this.array = (T) Array.newInstance(int.class, arrayShape);
+		this.array = (T) Array.newInstance(dType.is(), arrayShape);
 		this.array = createDeepCopy(data);
 	}
 	/**
@@ -95,12 +96,10 @@ public final class NDArray<T> {
 
 		// Parallel stream to copy array elements concurrently
 		IntStream.range(0, length).parallel().forEach(i -> {
-			Object element = Array.get(array, i);
+			T element = (T) Array.get(array, i);
 			if (element != null && element.getClass().isArray()) {
-				// Recursively copy nested arrays in parallel
-				Array.set(newArray, i, createDeepCopy((T) element));
+				Array.set(newArray, i, createDeepCopy(element));
 			} else {
-				// Copy primitive or object
 				Array.set(newArray, i, element);
 			}
 		});
@@ -128,11 +127,20 @@ public final class NDArray<T> {
 	 * @return The number of dimensions.
 	 * @throws ShapeException If the array has an inhomogeneous shape.
 	 */
-	public int calculateDimensions(Object arr, int level) throws ShapeException {
+	public int calculateDimensions(T arr, int level) throws ShapeException {
 		if (!arr.getClass().isArray()) {
 			return ndim;
 		}
-
+		if(arr.getClass().isPrimitive())
+		{
+			Arrays.stream((T[])arr).parallel().forEach(value->{
+				if(value instanceof Number)
+				{
+					elementSize = Math.max(elementSize, utils.getElementSize(value.getClass()));
+					this.dType = dType.fromSize(elementSize, (value instanceof Double || value instanceof Float));
+				}
+			});
+		}
 		int length = Array.getLength(arr);
 
 		synchronized (this) {  // Synchronize access to shared state (shape, ndim)
@@ -155,7 +163,7 @@ public final class NDArray<T> {
 
 		// Parallel stream to process the array
 		IntStream.range(0, length).sequential().forEach(i -> {
-			Object element = Array.get(arr, i);
+			T element = (T) Array.get(arr, i);
 			try{
 				if (element != null && element.getClass().isArray()) {
 					if (previousClass != null && previousClass.isArray()) {
@@ -217,7 +225,7 @@ public final class NDArray<T> {
 	 * Prints the array in a multi-dimensional format.
 	 */
 	public void printArray() {
-		System.out.println(Arrays.deepToString((Object[]) array));
+		System.out.println(Arrays.deepToString((T[]) array));
 	}
 
 	/**
@@ -265,7 +273,7 @@ public final class NDArray<T> {
 	 * @throws ShapeException If an error occurs during flattening.
 	 */
 	public <R> NDArray<R> flatten() throws ShapeException {
-		R flatArray = (R) new Object[(int) this.size];
+		R flatArray = (R) Array.newInstance(dType.is(), (int)this.size);
 		flattenRecursive(this.array, flatArray, 0);
 		this.index = 0;
 		return new NDArray<>(flatArray);

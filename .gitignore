@@ -7,3 +7,9 @@ docs/
 LICENSE
 CompleteScope.md
 out/
+C/
+*.DS_Store
+lib/
+*.h
+*.c
+*.class

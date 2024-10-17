@@ -40,24 +40,13 @@ public class ArithmaticOperations<T> {
      * @throws ShapeException If the shapes of arr1 and arr2 are incompatible for broadcasting.
      */
     public <R> NDArray<R> operate(NDArray<T> arr1, NDArray<T> arr2, OperationType operation) throws ShapeException {
-        // Compute broadcasted shape
         int[] broadcastedShape = utils.broadcastShapes(arr1.shape(), arr2.shape());
-
-        // Calculate total number of elements in the result
         long totalElementsLong = Arrays.stream(broadcastedShape).reduce(1, (a, b) -> a*b);
-        //        for (int dim : broadcastedShape) {
-//            totalElementsLong *= dim;
-//            if (totalElementsLong > Integer.MAX_VALUE) {
-//                throw new ShapeException("Total number of elements exceeds the maximum allowed size.");
-//            }
-//        }
-        // Get strides for indexing
         int[] arr1Strides = arr1.strides();
         int[] arr2Strides = arr2.strides();
 
         int totalElements = (int)totalElementsLong;
 
-        // Flatten the input arrays for easy indexing
         T[] flatArr1 = (T[]) arr1.flatten().getArray();
         T[] flatArr2 = (T[]) arr2.flatten().getArray();
 
@@ -66,7 +55,7 @@ public class ArithmaticOperations<T> {
         int elementSize2 = utils.getElementSize(flatArr2[0].getClass());
 
         // Initialize the output array
-        Object[] outputArray = new Object[totalElements];
+        R[] outputArray = (R[]) new Object[totalElements];
 
         int arr1Offset = broadcastedShape.length - arr1.shape().size();
         int arr2Offset = broadcastedShape.length - arr2.shape().size();
@@ -80,23 +69,22 @@ public class ArithmaticOperations<T> {
             // Adjust indices for arr1 based on its shape
             int[] arr1Indices = new int[arr1.shape().size()];
 
-            for (int j = 0; j < arr1.shape().size(); j++) {
-                if (arr1.shape().get(j) == 1) {
-                    arr1Indices[j] = 0;
+            IntStream.range(0, arr1.shape().size()).parallel().forEach(index -> {
+                if (arr1.shape().get(index) == 1) {
+                    arr1Indices[index] = 0;
                 } else {
-                    arr1Indices[j] = multiDimIndices[arr1Offset + j];
+                    arr1Indices[index] = multiDimIndices[arr1Offset + index];
                 }
-            }
+            });
 
-            // Adjust indices for arr2 based on its shape
             int[] arr2Indices = new int[arr2.shape().size()];
-            for (int j = 0; j < arr2.shape().size(); j++) {
-                if (arr2.shape().get(j) == 1) {
-                    arr2Indices[j] = 0;
+            IntStream.range(0, arr2.shape().size()).parallel().forEach(index -> {
+                if (arr2.shape().get(index) == 1) {
+                    arr2Indices[index] = 0;
                 } else {
-                    arr2Indices[j] = multiDimIndices[arr2Offset + j];
+                    arr2Indices[index] = multiDimIndices[arr2Offset + index];
                 }
-            }
+            });
 
             // Compute flat indices for the operands
             int arr1FlatIndex = utils.getFlatIndex(arr1Indices, arr1Strides) / elementSize1;
@@ -108,9 +96,9 @@ public class ArithmaticOperations<T> {
                 Number v2 = (Number) flatArr2[arr2FlatIndex];
 
                 boolean isFloatingPoint = (v1 instanceof Double || v1 instanceof Float || v2 instanceof Double || v2 instanceof Float);
-                outputArray[i] = isFloatingPoint ? getFloatingPointResult(v1, v2, operation) : getNumericResult(v1, v2, operation);
+                outputArray[i] = (R) (isFloatingPoint ? getFloatingPointResult(v1, v2, operation) : getNumericResult(v1, v2, operation));
             } else {
-                outputArray[i] = stringOperation(flatArr1[arr1FlatIndex].toString(), flatArr2[arr2FlatIndex].toString(), operation);
+                outputArray[i] = (R) stringOperation(flatArr1[arr1FlatIndex].toString(), flatArr2[arr2FlatIndex].toString(), operation);
             }
         });
 
@@ -165,68 +153,41 @@ public class ArithmaticOperations<T> {
      * @return The result of the operation as a {@code Number}.
      */
     private Number getTypedValue(Number v1, Number v2, Number dominating, OperationType o) {
+        switch (o) {
+            case ADDITION:
+                return dominating instanceof Byte ? v1.byteValue() + v2.byteValue() :
+                        dominating instanceof Short ? v1.shortValue() + v2.shortValue() :
+                                dominating instanceof Integer ? v1.intValue() + v2.intValue() :
+                                        v1.longValue() + v2.longValue();
 
-        if (dominating instanceof Byte) {
-            switch (o) {
-                case ADDITION:
-                    return v1.byteValue() + v2.byteValue();
-                case SUBTRACTION:
-                    return v1.byteValue() - v2.byteValue();
-                case MULTIPLICATION:
-                    return v1.byteValue() * v2.byteValue();
-                case DIVISION:
-                    return v1.byteValue() / v2.byteValue();
-                case MODULO:
-                    return v1.byteValue() % v2.byteValue();
-                default:
-                    throw new UnsupportedOperationException(unsupportedOperation);
-            }
-        } else if (dominating instanceof Short) {
-            switch (o) {
-                case ADDITION:
-                    return v1.shortValue() + v2.shortValue();
-                case SUBTRACTION:
-                    return v1.shortValue() - v2.shortValue();
-                case MULTIPLICATION:
-                    return v1.shortValue() * v2.shortValue();
-                case DIVISION:
-                    return v1.shortValue() / v2.shortValue();
-                case MODULO:
-                    return v1.shortValue() % v2.shortValue();
-                default:
-                    throw new UnsupportedOperationException(unsupportedOperation);
-            }
-        } else if (dominating instanceof Integer) {
-            switch (o) {
-                case ADDITION:
-                    return v1.intValue() + v2.intValue();
-                case SUBTRACTION:
-                    return v1.intValue() - v2.intValue();
-                case MULTIPLICATION:
-                    return v1.intValue() * v2.intValue();
-                case DIVISION:
-                    return v1.intValue() / v2.intValue();
-                case MODULO:
-                    return v1.intValue() % v2.intValue();
-                default:
-                    throw new UnsupportedOperationException(unsupportedOperation);
-            }
-        } else {
-            switch (o) {
-                case ADDITION:
-                    return v1.longValue() + v2.longValue();
-                case SUBTRACTION:
-                    return v1.longValue() - v2.longValue();
-                case MULTIPLICATION:
-                    return v1.longValue() * v2.longValue();
-                case DIVISION:
-                    return v1.longValue() / v2.longValue();
-                case MODULO:
-                    return v1.longValue() % v2.longValue();
-                default:
-                    throw new UnsupportedOperationException(unsupportedOperation);
-            }
+            case SUBTRACTION:
+                return dominating instanceof Byte ? v1.byteValue() - v2.byteValue() :
+                        dominating instanceof Short ? v1.shortValue() - v2.shortValue() :
+                                dominating instanceof Integer ? v1.intValue() - v2.intValue() :
+                                        v1.longValue() - v2.longValue();
+
+            case MULTIPLICATION:
+                return dominating instanceof Byte ? ((short) v1.byteValue() << v2.byteValue()) :
+                        dominating instanceof Short ? ((int) v1.shortValue() << v2.shortValue()) :
+                                dominating instanceof Integer ? ((long) v1.intValue() << v2.intValue()) :
+                                        v1.longValue() << v2.longValue();
+
+            case DIVISION:
+                return dominating instanceof Byte ? (v1.byteValue() >> v2.byteValue()) :
+                        dominating instanceof Short ? (v1.shortValue() >> v2.shortValue()) :
+                                dominating instanceof Integer ? (v1.intValue() >> v2.intValue()) :
+                                        v1.longValue() >> v2.longValue();
+
+            case MODULO:
+                return dominating instanceof Byte ? v1.byteValue() % v2.byteValue() :
+                        dominating instanceof Short ? v1.shortValue() % v2.shortValue() :
+                                dominating instanceof Integer ? v1.intValue() % v2.intValue() :
+                                        v1.longValue() % v2.longValue();
+
+            default:
+                throw new UnsupportedOperationException(unsupportedOperation);
         }
+
     }
 
     /**
