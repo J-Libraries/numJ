@@ -21,28 +21,95 @@ import java.util.Arrays;
 class NDArrayTest {
 
     private NDArray<Integer[][][]> array;
+    private NDArray<int[][][]> primitiveIntArray;
     private NDArray<Float[][][]> floatArray;
+    private NDArray<float[][][]> primitiveFloatArray;
     private NDArray<Double[][][]> doubleArray;
+    private NDArray<double[][][]> primitiveDoubleArray;
     private NDArray<String[][][]> stringArray;
+    private NDArray<Byte[][][]> byteArray;
+    private NDArray<byte[][][]> primitiveByteArray;
     private NDArray<Object[][][]> mixedArray;
+
 
     @BeforeEach
     public void setUp() {
-        Integer[][][] data = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+        Integer[][][] data = {{{400, 200}, {300, 400}}, {{500, 600}, {700, 800}}};
         Float[][][] floatData = {{{1.1f, 2.2f}, {3.3f, 4.4f}}, {{5.5f, 6.6f}, {7.7f, 8.8f}}};
         Double[][][] doubleData = {{{1.1, 2.2}, {3.3, 4.4}}, {{5.5, 6.6}, {7.7, 8.8}}};
         String[][][] stringData = {{{"a", "b"}, {"c", "d"}}, {{"e", "f"}, {"g", "h"}}};
         Object[][][] mixedData = {{{1, 2}, {3.5, "4"}}, {{5, 6.7}, {"8", 9}}};
+
+        int[][][] primitiveIntData = {{{300, 200}, {3000, 4000}}, {{50000, 60000}, {70000, 80000}}};
+        float[][][] primitiveFloatData = {{{1.1f, 2.2f}, {3.3f, 4.4f}}, {{5.5f, 6.6f}, {7.7f, 8.8f}}};
+        double[][][] primitiveDoubleData = {{{1.1, 2.2}, {3.3, 4.4}}, {{5.5, 6.6}, {7.7, 8.8}}};
+        Byte[][][] byteData = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+        byte[][][] primitiveByteData = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+
         try {
             array = new NDArray<>(data);
+            primitiveIntArray = new NDArray<>(primitiveIntData);
             floatArray = new NDArray<>(floatData);
+            primitiveFloatArray = new NDArray<>(primitiveFloatData);
             doubleArray = new NDArray<>(doubleData);
+            primitiveDoubleArray = new NDArray<>(primitiveDoubleData);
             stringArray = new NDArray<>(stringData);
             mixedArray = new NDArray<>(mixedData);
+            byteArray = new NDArray<>(byteData);
+            primitiveByteArray = new NDArray<>(primitiveByteData);
         } catch (ShapeException ignored) {
 
         }
     }
+
+
+
+    @Test
+    <T> void testEmptyArrayCreation() throws ShapeException {
+        T[] emptyData = (T[]) new Object[0];
+        NDArray<T[]> emptyArray = new NDArray<>(emptyData);
+        assertEquals(1, emptyArray.ndim());
+        assertEquals(0L, emptyArray.size());
+        assertArrayEquals(new Object[0], (Object[]) emptyArray.getArray());
+    }
+
+    @Test
+    <T> void testArrayWithNullValues() throws ShapeException {
+        T[] dataWithNull = (T[]) new Object[]{1, null, 3};
+        NDArray<T[]> array = new NDArray<>(dataWithNull);
+        assertEquals(1, array.ndim());
+        assertEquals(3L, array.size());
+        assertArrayEquals(dataWithNull, (T[]) array.getArray());
+    }
+
+
+    @Test
+    void testMemoryCalculation() {
+        assertEquals(32L, array.itemSize());
+        assertEquals(128L, primitiveDoubleArray.itemSize());
+        assertEquals(16L, byteArray.itemSize());
+    }
+
+
+    @Test
+    <T> void testSingleElementArray() throws ShapeException {
+        T[] singleElementData = (T[]) new Object[]{1};
+        NDArray<T[]> singleArray = new NDArray<>(singleElementData);
+        assertEquals(1, singleArray.ndim());
+        assertEquals(1L, singleArray.size());
+        assertArrayEquals(singleElementData, (T[]) singleArray.getArray());
+    }
+
+
+    /*@Test
+    void testPrintArray() throws ShapeException {
+        Integer[][][] data = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+        NDArray<Integer[][][]> array = new NDArray<>(data);
+        array.printArray();
+        array.printArray(true);  // Check full printing
+    }*/
+
+
 
 
     /**
@@ -66,12 +133,18 @@ class NDArrayTest {
     @Test
     public void testValidConstructionWithIntegers() {
         assertNotNull(array);
+        assertNotNull(primitiveIntArray);
         assertEquals(3, array.ndim());
+        assertEquals(3, primitiveIntArray.ndim());
         assertEquals(Arrays.asList(2, 2, 2), array.shape());
+        assertEquals(Arrays.asList(2, 2, 2), primitiveIntArray.shape());
         assertEquals(8L, array.size());
+        assertEquals(8L, primitiveIntArray.size());
 
-        Integer[][][] expectedData = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+        Integer[][][] expectedData = {{{400, 200}, {300, 400}}, {{500, 600}, {700, 800}}};
         assertArrayEquals(expectedData, (Integer[][][]) array.getArray());
+        int[][][] intExpectedData = {{{300, 200}, {3000, 4000}}, {{50000, 60000}, {70000, 80000}}};
+        assertArrayEquals(intExpectedData, (int[][][]) primitiveIntArray.getArray());
     }
 
     /**
@@ -85,12 +158,19 @@ class NDArrayTest {
     @Test
     public void testValidConstructionWithFloats() throws ShapeException {
         assertNotNull(floatArray);
+        assertNotNull(primitiveFloatArray);
         assertEquals(3, floatArray.ndim());
+        assertEquals(3, primitiveFloatArray.ndim());
         assertEquals(Arrays.asList(2, 2, 2), floatArray.shape());
+        assertEquals(Arrays.asList(2, 2, 2), primitiveFloatArray.shape());
         assertEquals(8L, floatArray.size());
+        assertEquals(8L, primitiveFloatArray.size());
 
         Float[][][] expectedData = {{{1.1f, 2.2f}, {3.3f, 4.4f}}, {{5.5f, 6.6f}, {7.7f, 8.8f}}};
         assertArrayEquals(expectedData, (Float[][][]) floatArray.getArray());
+
+        float[][][] floatExpectedData = {{{1.1f, 2.2f}, {3.3f, 4.4f}}, {{5.5f, 6.6f}, {7.7f, 8.8f}}};
+        assertArrayEquals(floatExpectedData, (float[][][]) primitiveFloatArray.getArray());
     }
 
     /**
@@ -104,12 +184,19 @@ class NDArrayTest {
     @Test
     public void testValidConstructionWithDoubles() throws ShapeException {
         assertNotNull(doubleArray);
+        assertNotNull(primitiveDoubleArray);
         assertEquals(3, doubleArray.ndim());
+        assertEquals(3, primitiveDoubleArray.ndim());
         assertEquals(Arrays.asList(2, 2, 2), doubleArray.shape());
+        assertEquals(Arrays.asList(2, 2, 2), primitiveDoubleArray.shape());
         assertEquals(8L, doubleArray.size());
+        assertEquals(8L, primitiveDoubleArray.size());
 
         Double[][][] expectedData = {{{1.1, 2.2}, {3.3, 4.4}}, {{5.5, 6.6}, {7.7, 8.8}}};
         assertArrayEquals(expectedData, (Double[][][]) doubleArray.getArray());
+
+        double[][][] doubleExpectedData = {{{1.1, 2.2}, {3.3, 4.4}}, {{5.5, 6.6}, {7.7, 8.8}}};
+        assertArrayEquals(doubleExpectedData, (double[][][]) primitiveDoubleArray.getArray());
     }
 
     /**
@@ -147,6 +234,31 @@ class NDArrayTest {
         assertEquals(Arrays.asList(2, 2, 2), mixedArray.shape());
         assertEquals(8L, mixedArray.size());
         assertArrayEquals(mixedData, (Object[][][]) mixedArray.getArray());
+    }
+
+    /**
+     * Tests the creation of an NDArray with mixed data types.
+     * Confirms that the array is correctly initialized and checks its dimensions,
+     * shape, size, and content.
+     *
+     * @throws ShapeException if the shape of the input data is invalid.
+     */
+
+    @Test
+    public void testByteDataArray() throws ShapeException {
+        assertNotNull(byteArray);
+        assertNotNull(primitiveByteArray);
+        assertEquals(3, byteArray.ndim());
+        assertEquals(3, primitiveByteArray.ndim());
+        assertEquals(Arrays.asList(2, 2, 2), byteArray.shape());
+        assertEquals(Arrays.asList(2, 2, 2), primitiveByteArray.shape());
+        assertEquals(8L, byteArray.size());
+        assertEquals(8L, primitiveByteArray.size());
+
+        Byte[][][] expectedData = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+        assertArrayEquals(expectedData, (Byte[][][]) byteArray.getArray());
+        byte[][][] byteExpectedData = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+        assertArrayEquals(byteExpectedData, (byte[][][]) primitiveByteArray.getArray());
     }
 
     /**
@@ -253,6 +365,23 @@ class NDArrayTest {
         int[] newShape = {0, 2, 2};
         assertThrows(ShapeException.class, () -> array.reshape(newShape));
     }
+
+
+   /* @Test
+    void testStrideCalculation() {
+        int[] strides = array.strides(new int[]{2, 2, 2});
+        assertArrayEquals(new int[]{16, 8, 4}, strides);
+    }*/
+
+
+    /*@Test
+    void testInvalidMemoryCalculation() {
+        assertThrows(IllegalStateException.class, () -> {
+            array.nBytes = Long.MAX_VALUE;
+            array.itemSize();
+        });
+    }*/
+
 
     /*@Test
     public void testItemSize() {

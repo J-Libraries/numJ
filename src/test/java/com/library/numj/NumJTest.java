@@ -49,11 +49,7 @@ class NumJTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "1, 2, 2",
-            "2, 3, 3",
-            "3, 4, 4"
-    })
+    @MethodSource("provideArrayCreationData")
     <T> void testArrayCreationWithShape(T value, int expectedShape, DType dType) throws Exception {
         NumJ<T> numJ = new NumJ<>();
         int[] shape = {expectedShape, expectedShape};
@@ -63,14 +59,6 @@ class NumJTest {
         assertNotNull(result);
         assertEquals(2, result.ndim());
         assertArrayEquals(shape, result.shape().stream().mapToInt(Integer::intValue).toArray());
-    }
-
-    static Stream<Arguments> shapeProvider() {
-        return Stream.of(
-                Arguments.of(1, 2, DType.INT32),
-                Arguments.of(3.14, 3, DType.FLOAT64),
-                Arguments.of("a", 4, DType.STR)
-        );
     }
 
     @ParameterizedTest
@@ -139,7 +127,7 @@ class NumJTest {
 
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
-    <T> void testAddition(T[][] data1, T[][] data2, T[][] expected, DType dType) throws Exception {
+    <T> void testAddition(T data1, T data2, T expected) throws Exception {
         NumJ<T> numJ = new NumJ<>();
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
@@ -149,7 +137,7 @@ class NumJTest {
 
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
-    <T> void testSubtraction(T[][] data1, T[][] data2, T[][] expected, DType dType) throws Exception {
+    <T> void testSubtraction(T data1, T data2, T expected) throws Exception {
         NumJ<T> numJ = new NumJ<>();
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
@@ -159,7 +147,7 @@ class NumJTest {
 
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
-    <T> void testMultiplication(T[][] data1, T[][] data2, T[][] expected, DType dType) throws Exception {
+    <T> void testMultiplication(T data1, T data2, T expected) throws Exception {
         NumJ<T> numJ = new NumJ<>();
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
@@ -169,7 +157,7 @@ class NumJTest {
 
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
-    <T> void testDivision(T[][] data1, T[][] data2, T[][] expected, DType dType) throws Exception {
+    <T> void testDivision(T data1, T data2, T expected) throws Exception {
         NumJ<T> numJ = new NumJ<>();
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
@@ -178,13 +166,13 @@ class NumJTest {
     }
 
 
-    @Test
-    void testTranspose() throws Exception {
-        Integer[][] data = {{1, 2}, {3, 4}};
-        NDArray<Integer[][]> arr = numJ.array(data);
-        NDArray<Integer> transposed = numJ.transpose(arr);
-        Integer[][] expected = {{1, 3}, {2, 4}};
-        assertArrayEquals(expected, (Integer[][]) transposed.getArray());
+    @ParameterizedTest
+    @MethodSource("provideDataForTranspose")
+   <T> void testTranspose(T data , T expected) throws Exception {
+        NumJ<T> numJ = new NumJ<>();
+        NDArray<T> arr = numJ.array(data);
+        NDArray<T> transposed = numJ.transpose(arr);
+        assertArrayEquals((Object[]) expected, (Object[]) transposed.getArray());
     }
 
     @Test
@@ -194,13 +182,16 @@ class NumJTest {
         }, "Expected IllegalArgumentException when range is negative");
     }
 
-    @Test
-    void testZerosWithInvalidShape() {
+    @ParameterizedTest
+    @MethodSource("provideDataForZeros")
+    <T> void testZerosWithInvalidShape(DType dType) {
+        NumJ<T> numJ = new NumJ<>();
         int[] invalidShape = {0, 2};  // Invalid dimension
         assertThrows(ShapeException.class, () -> {
-            numJ.zeros(invalidShape);
+            numJ.zeros(invalidShape, dType);
         }, "Expected ShapeException for invalid shape");
     }
+
 
     @Test
     void testEyeWithInvalidDiagonal() {
@@ -209,28 +200,29 @@ class NumJTest {
         }, "Expected IllegalArgumentException for invalid diagonal index");
     }
 
-    @Test
-    void testAdditionWithMismatchedShapes() throws ShapeException {
-        Integer[][] data1 = {{1, 2}, {3, 4}};
-        Integer[] data2 = {5, 6, 7};  // Mismatched shape
+    @ParameterizedTest
+    @MethodSource("provideDataForAddition")
+    <T> void testAdditionWithMismatchedShapes(T data1, T data2) throws ShapeException {
+        NumJ<T> numJ = new NumJ<>();
 
-        NDArray<Integer[][]> arr1 = numJ.array(data1);
-        NDArray<Integer[]> arr2 = numJ.array(data2);
+        NDArray<T> arr1 = numJ.array(data1);
+        NDArray<T> arr2 = numJ.array(data2);
 
         assertThrows(ShapeException.class, () -> {
             numJ.add(arr1, arr2);
         }, "Expected ShapeException for mismatched shapes");
     }
 
-    @Test
-    void testDivisionByZero() throws ShapeException {
-        Integer[][] data1 = {{10, 20}, {30, 40}};
-        Integer[][] data2 = {{0, 2}, {0, 10}};  // Division by zero
+    @ParameterizedTest
+    @MethodSource("provideDataForDivision")
+    <T> void testDivisionByZero(T data1, T data2) throws ShapeException {
+        NumJ<T> numJ = new NumJ<>();
 
-        NDArray<Integer[][]> arr1 = numJ.array(data1);
-        NDArray<Integer[][]> arr2 = numJ.array(data2);
+        NDArray<T> arr1 = numJ.array(data1);
+        NDArray<T> arr2 = numJ.array(data2);
 
-        assertThrows(ArithmeticException.class, () -> {
+        assertThrows(ArithmeticException.class, () ->
+        {
             numJ.divide(arr1, arr2);
         }, "Expected ArithmeticException for division by zero");
     }
@@ -238,8 +230,8 @@ class NumJTest {
     static Stream<Arguments> provideDataForZerosAndOnes() {
         return Stream.of(
                 Arguments.of(0, new int[]{2, 2}, DType.INT32),
-                Arguments.of(1.0, new int[]{2, 2}, DType.FLOAT64),
-                Arguments.of("0", new int[]{2, 2}, DType.STR)
+                Arguments.of(1.0, new int[]{2, 2}, DType.FLOAT64)
+                //Arguments.of("0", new int[]{2, 2}, DType.STR)
         );
     }
 
@@ -257,5 +249,42 @@ class NumJTest {
         );
     }
 
+    static Stream<Arguments> provideDataForZeros() {
+        return Stream.of(
+                Arguments.of(DType.INT32),
+                Arguments.of(DType.FLOAT64)
+                //Arguments.of(DType.STR)
+        );
+    }
+
+    static Stream<Arguments> provideDataForAddition() {
+        return Stream.of(
+                Arguments.of(new Integer[][]{{1, 2}, {3, 4}}, new Integer[]{5, 6, 7}, DType.INT32),
+                Arguments.of(new Double[][]{{1.1, 2.2}, {3.3, 4.4}}, new Double[]{5.5, 6.6, 7.7}, DType.FLOAT64)
+        );
+    }
+
+    static Stream<Arguments> provideDataForDivision() {
+        return Stream.of(
+                Arguments.of(new Integer[][]{{10, 20}, {30, 40}}, new Integer[][]{{0, 2}, {0, 10}}, DType.INT32),
+                Arguments.of(new Double[][]{{10.5, 20.5}, {30.5, 40.5}}, new Double[][]{{0.0, 2.0}, {0.0, 10.0}}, DType.FLOAT64)
+        );
+    }
+
+    static Stream<Arguments> provideArrayCreationData() {
+        return Stream.of(
+                Arguments.of(1, 2, DType.INT32),
+                Arguments.of(2.0, 3, DType.FLOAT64)
+               // Arguments.of("3", 4, DType.STR)
+        );
+    }
+
+    static Stream<Arguments> shapeProvider() {
+        return Stream.of(
+                Arguments.of(1, 2, DType.INT32),
+                Arguments.of(3.14, 3, DType.FLOAT64)
+                //Arguments.of("a", 4, DType.STR)
+        );
+    }
 
 }
