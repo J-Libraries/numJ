@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
  * It supports recursive filling of multi-dimensional arrays.
  */
 @SuppressWarnings("unchecked")
-public class ArrayCreation<T> {
+public class ArrayCreation {
     ForkJoinPool pool = new ForkJoinPool();
 
     /**
@@ -28,7 +28,7 @@ public class ArrayCreation<T> {
      * @param value  The value to fill in the array.
      * @return The filled array.
      */
-    private T fillRecursive(T array, DType dType, double value) {
+    private <T> T fillRecursive(T array, DType dType, double value) {
         if (!array.getClass().isArray()) return array;
 
         int length = Array.getLength(array);
@@ -50,9 +50,9 @@ public class ArrayCreation<T> {
      * @param dType The data type of the array elements.
      * @return An NDArray filled with zeros.
      */
-    public NDArray<T> zeros(int[] shape, DType dType) {
+    public <T> NDArray<T> zeros(int[] shape, DType dType) {
         T array = (T) Array.newInstance(dType.is(), shape);
-        return new NumJ<T>().array(fillRecursive(array, dType, 0), shape, shape.length, dType);
+        return new NumJ().array(fillRecursive(array, dType, 0), shape, shape.length, dType);
     }
 
     /**
@@ -62,9 +62,9 @@ public class ArrayCreation<T> {
      * @param dType The data type of the array elements.
      * @return An NDArray filled with ones.
      */
-    public NDArray<T> ones(int[] shape, DType dType) {
+    public <T> NDArray<T> ones(int[] shape, DType dType) {
         T array = (T) Array.newInstance(dType.is(), shape);
-        return new NumJ<T>().array(fillRecursive(array, dType, 1), shape, shape.length, dType);
+        return new NumJ().array(fillRecursive(array, dType, 1), shape, shape.length, dType);
     }
 
 
@@ -79,7 +79,7 @@ public class ArrayCreation<T> {
      * @return A new NDArray representing the identity matrix.
      * @throws ShapeException If there is an issue creating the identity matrix.
      */
-    public NDArray<T> eye(int rows, int cols, int identityDiagonal, DType dType) throws ShapeException {
+    public <T> NDArray<T> eye(int rows, int cols, int identityDiagonal, DType dType) throws ShapeException {
         T array = (T) Array.newInstance(dType.is(), new int[]{rows, cols});
         IntStream.range(0, rows).parallel().forEach(index ->{
             int j = index + identityDiagonal;
@@ -88,6 +88,6 @@ public class ArrayCreation<T> {
                 Array.set(Array.get(array, index), j, 1);
             }
         });
-        return new NumJ<T>().array(array);
+        return new NumJ().array(array);
     }
 }

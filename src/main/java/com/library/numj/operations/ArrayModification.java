@@ -11,15 +11,15 @@ import java.util.Arrays;
 
 
 @SuppressWarnings("unchecked")
-public class ArrayModification<T> {
-    Utils<T> utils = new Utils<>();
+public class ArrayModification {
+    Utils utils = new Utils();
     /**
      * Transposes the array by reversing its axes.
      *
      * @return A new NDArray that is the transposed version of the original array.
      * @throws ShapeException If an error occurs during transposition.
      */
-    public <R> NDArray<R> transpose(NDArray<T> array) throws ShapeException {
+    public <T, R> NDArray<R> transpose(NDArray<T> array) throws ShapeException {
         int ndim = array.ndim();
         int[] axes = new int[ndim];
         for (int i = 0; i < ndim; i++) {
@@ -28,7 +28,7 @@ public class ArrayModification<T> {
 
         R transposedArray =
                 transposeRecursive(array, axes, new int[0], utils.getComponentType(array.getArray()));
-        return new NumJ<R>().array(transposedArray);
+        return new NumJ().array(transposedArray);
     }
 
     /**
@@ -40,7 +40,7 @@ public class ArrayModification<T> {
      * @return The transposed array.
      * @throws ShapeException If an error occurs during transposition.
      */
-    private <R> R transposeRecursive(NDArray<T> array, int[] axes, int[] currentIndices,Class<?> type) throws ShapeException {
+    private <T, R> R transposeRecursive(NDArray<T> array, int[] axes, int[] currentIndices,Class<?> type) throws ShapeException {
         int ndim = array.ndim();
         if (currentIndices.length == ndim) {
             int[] originalIndices = new int[ndim];

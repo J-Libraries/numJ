@@ -6,6 +6,7 @@ import com.library.numj.Utils;
 import com.library.numj.enums.OperationType;
 import com.library.numj.exceptions.ShapeException;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -16,18 +17,17 @@ import static com.library.numj.ExceptionMessages.unsupportedOperation;
  * on {@link NDArray} objects. It supports operations like addition, subtraction, multiplication,
  * and division with broadcasting capabilities similar to NumPy.
  *
- * @param <T> The type of elements in the NDArray.
  */
 @SuppressWarnings("unchecked")
-public class ArithmaticOperations<T> {
+public class ArithmaticOperations {
     /** Utility instance for helper methods like broadcasting and indexing. */
-    Utils<T> utils;
+    Utils utils;
 
     /**
      * Constructs an instance of {@code ArithmaticOperations} and initializes utilities.
      */
     public ArithmaticOperations() {
-        utils = new Utils<>();
+        utils = new Utils();
     }
 
     /**
@@ -39,7 +39,7 @@ public class ArithmaticOperations<T> {
      * @return A new NDArray containing the result of the operation.
      * @throws ShapeException If the shapes of arr1 and arr2 are incompatible for broadcasting.
      */
-    public <R> NDArray<R> operate(NDArray<T> arr1, NDArray<T> arr2, OperationType operation) throws ShapeException {
+    public <T, R> NDArray<R> operate(NDArray<T> arr1, NDArray<T> arr2, OperationType operation) throws ShapeException {
         int[] broadcastedShape = utils.broadcastShapes(arr1.shape(), arr2.shape());
         long totalElementsLong = Arrays.stream(broadcastedShape).reduce(1, (a, b) -> a*b);
         int[] arr1Strides = arr1.strides();
@@ -49,10 +49,9 @@ public class ArithmaticOperations<T> {
 
         T[] flatArr1 = (T[]) arr1.flatten().getArray();
         T[] flatArr2 = (T[]) arr2.flatten().getArray();
-
         // Get element sizes for proper indexing
-        int elementSize1 = utils.getElementSize(flatArr1[0].getClass());
-        int elementSize2 = utils.getElementSize(flatArr2[0].getClass());
+        int elementSize1 = utils.getElementSize(Array.get(flatArr1, 0).getClass());
+        int elementSize2 = utils.getElementSize(Array.get(flatArr2, 0).getClass());
 
         // Initialize the output array
         R[] outputArray = (R[]) new Object[totalElements];
@@ -103,7 +102,7 @@ public class ArithmaticOperations<T> {
         });
 
         // Construct and return the result NDArray with the broadcasted shape
-        return  new NumJ<R>().array((R) outputArray).reshape(broadcastedShape);
+        return  new NumJ().array((R) outputArray).reshape(broadcastedShape);
     }
 
     /**

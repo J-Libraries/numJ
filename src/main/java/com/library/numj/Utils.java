@@ -2,6 +2,8 @@ package com.library.numj;
 
 import com.library.numj.exceptions.ShapeException;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,19 +11,18 @@ import java.util.Map;
 /**
  * Utility class providing helper methods for array operations in NumJ.
  *
- * @param <T> the type parameter.
  */
-public final class Utils<T> {
+public final class Utils {
 
     /** Map containing the size in bytes of various numeric classes. */
     static Map<Class<?>, Integer> classSizeMap = new HashMap<>();
     static {
-        classSizeMap.put(int.class, 4);
-        classSizeMap.put(long.class, 8);
-        classSizeMap.put(double.class, 8);
-        classSizeMap.put(float.class, 4);
-        classSizeMap.put(short.class, 2);
-        classSizeMap.put(byte.class, 1);
+        classSizeMap.put(Integer.class, 4);
+        classSizeMap.put(Long.class, 8);
+        classSizeMap.put(Double.class, 8);
+        classSizeMap.put(Float.class, 4);
+        classSizeMap.put(Short.class, 2);
+        classSizeMap.put(Byte.class, 1);
     }
 
     /**
@@ -99,7 +100,7 @@ public final class Utils<T> {
         }
         return flatIndex;
     }
-    public Class<?> getComponentType(T array)
+    public <T> Class<?> getComponentType(T array)
     {
         Class<?> componenetType = array.getClass().getComponentType();
         while (componenetType.isArray())
@@ -107,5 +108,19 @@ public final class Utils<T> {
             componenetType = componenetType.getComponentType();
         }
         return componenetType;
+    }
+    public <T> boolean isPrimitive(Object array)
+    {
+        if(array.getClass().isArray())
+        {
+            Object value = Array.get(array, 0);
+            return (value instanceof Number || value instanceof String
+                    || (array.getClass().getComponentType() != null && array.getClass().getComponentType().isPrimitive()));
+        }
+        return false;
+    }
+    public boolean isValue(Object value)
+    {
+        return (value instanceof Number || value instanceof String);
     }
 }

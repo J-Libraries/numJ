@@ -28,12 +28,12 @@ public enum DType {
 	static Map<Integer, DType> sizeToTypeNumericMap = new HashMap<>();
 	static Map<Integer, DType> sizeToTypeFloatingPointMap = new HashMap<>();
 	static {
-		typeToClassMap.put(FLOAT32, float.class);
-		typeToClassMap.put(FLOAT64, double.class);
-		typeToClassMap.put(INT8, byte.class);
-		typeToClassMap.put(INT16, short.class);
-		typeToClassMap.put(INT32, int.class);
-		typeToClassMap.put(INT64, long.class);
+		typeToClassMap.put(FLOAT32, Float.class);
+		typeToClassMap.put(FLOAT64, Double.class);
+		typeToClassMap.put(INT8, Byte.class);
+		typeToClassMap.put(INT16, Short.class);
+		typeToClassMap.put(INT32, Integer.class);
+		typeToClassMap.put(INT64, Long.class);
 
 		sizeToTypeNumericMap.put(1, INT8);
 		sizeToTypeNumericMap.put(2, INT16);

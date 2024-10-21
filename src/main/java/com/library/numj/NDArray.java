@@ -32,7 +32,7 @@ public final class NDArray<T> {
 	private long nBytes = 0;
 	private int index = 0;
 	/** Utility class instance for helper methods. */
-	Utils<T> utils;
+	Utils utils;
 	/** Data Type of current array */
 	DType dType = DType.INT8;
 	int elementSize = 0;
@@ -43,7 +43,7 @@ public final class NDArray<T> {
 	 * @throws ShapeException If the array has an inhomogeneous shape.
 	 */
 	NDArray(T data) throws ShapeException {
-		utils = new Utils<>();
+		utils = new Utils();
 		calculateDimensions(data, 0);
 		calculateSize();
 		int[] arrayShape = shape.stream().mapToInt(Integer::intValue).toArray();
@@ -60,7 +60,7 @@ public final class NDArray<T> {
 	NDArray(T data, int[] shape, int ndim, DType dType) {
 		this.array = data;
 		this.dType = dType;
-		utils = new Utils<>();
+		utils = new Utils();
 		Arrays.stream(shape).sequential().forEach(value -> {
 			this.shape.add(value);
 			this.size *= value;
@@ -133,9 +133,12 @@ public final class NDArray<T> {
 		if(arr.getClass().isPrimitive())
 		{
 			Arrays.stream((T[])arr).parallel().forEach(value->{
+
 				if(value instanceof Number)
 				{
+
 					elementSize = Math.max(elementSize, utils.getElementSize(value.getClass()));
+
 					this.dType = dType.fromSize(elementSize, (value instanceof Double || value instanceof Float));
 				}
 			});
@@ -230,9 +233,9 @@ public final class NDArray<T> {
 		printRecurssive(array, 1, isFullArray);
 	}
 
-	private void printRecurssive(Object array, int depth, boolean isFull) {
+	private void printRecurssive(T array, int depth, boolean isFull) {
 		String indent = getIndent(depth);
-		if(array.getClass().getComponentType().isPrimitive())
+		if(utils.isPrimitive(array))
 		{
 			System.out.print(indent + "[");
 			int length = Array.getLength(array);
@@ -274,7 +277,7 @@ public final class NDArray<T> {
 			System.out.println(indent + "[");
 			for(int i = 0;i<Array.getLength(array);i++)
 			{
-				printRecurssive(Array.get(array, i), depth+1, isFull);
+				printRecurssive((T) Array.get(array, i), depth+1, isFull);
 			}
 			int l = Array.getLength(array);
 			if(depth == l-1) {
@@ -318,20 +321,22 @@ public final class NDArray<T> {
 	 * @param currentArray The current sub-array being processed.
 	 * @param flatArray     The list to accumulate the flattened elements.
 	 */
-	private <R> void flattenRecursive(T currentArray, R flatArray, int level) {
+	private synchronized  <R> void flattenRecursive(T currentArray, R flatArray, int level) {
 
-		if (currentArray.getClass().isArray()) {
-			final int finalLevel = level+1;
-			if(currentArray.getClass().getComponentType().isPrimitive())
+		final int finalLevel = level+1;
+		if(utils.isPrimitive(currentArray))
+		{
+			for(int i = 0;i<Array.getLength(currentArray);i++)
 			{
-				for(int i = 0;i<Array.getLength(currentArray);i++)
-				{
-					Array.set(flatArray, index++, Array.get(currentArray, i));
-				}
-			}else{
-                Arrays.stream(((T[])currentArray)).sequential()
-					.forEach(element -> flattenRecursive(element, flatArray, finalLevel));
+				Array.set(flatArray, index++, Array.get(currentArray, i));
 			}
+		}else if(utils.isValue(currentArray))
+		{
+			Array.set(flatArray, index++, currentArray);
+		}
+		else{
+			Arrays.stream(((T[])currentArray)).sequential()
+					.forEach(element -> flattenRecursive(element, flatArray, finalLevel));
 		}
 	}
 
@@ -343,6 +348,7 @@ public final class NDArray<T> {
 	 */
 	public <R> NDArray<R> flatten() throws ShapeException {
 		R flatArray = (R) Array.newInstance(dType.is(), (int)this.size);
+		Arrays.fill((R[])flatArray, 0);
 		flattenRecursive(this.array, flatArray, 0);
 		this.index = 0;
 		return new NDArray<>(flatArray);
