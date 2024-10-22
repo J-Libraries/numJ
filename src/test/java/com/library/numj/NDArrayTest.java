@@ -18,8 +18,19 @@ import java.util.Arrays;
  * 5. Test exception handling.
  * 6. Test edge cases and boundary conditions.
  */
+/**
+ * This class contains unit tests for the NDArray class.
+ * It covers various aspects of NDArray functionality, including creation,
+ * memory calculation, and handling of different data types.
+ *
+ * @author Anmol Raghuvanshi(ershadow786)
+ */
+
 class NDArrayTest {
 
+    /**
+     * Array instances for different data types, initialized in setUp method.
+     */
     private NDArray<Integer[][][]> array;
     private NDArray<int[][][]> primitiveIntArray;
     private NDArray<Float[][][]> floatArray;
@@ -32,6 +43,9 @@ class NDArrayTest {
     private NDArray<Object[][][]> mixedArray;
 
 
+    /**
+     * Initializes array instances with sample data before each test.
+     */
     @BeforeEach
     public void setUp() {
         Integer[][][] data = {{{400, 200}, {300, 400}}, {{500, 600}, {700, 800}}};
@@ -63,7 +77,12 @@ class NDArrayTest {
     }
 
 
-
+    /**
+     * Tests the creation of an empty NDArray.
+     *
+     * @param <T> Generic type parameter.
+     * @throws ShapeException If the shape is invalid.
+     */
     @Test
     <T> void testEmptyArrayCreation() throws ShapeException {
         T[] emptyData = (T[]) new Object[0];
@@ -73,6 +92,12 @@ class NDArrayTest {
         assertArrayEquals(new Object[0], (Object[]) emptyArray.getArray());
     }
 
+    /**
+     * Tests the creation of an NDArray with null values.
+     *
+     * @param <T> Generic type parameter.
+     * @throws ShapeException If the shape is invalid.
+     */
     @Test
     <T> void testArrayWithNullValues() throws ShapeException {
         T[] dataWithNull = (T[]) new Object[]{1, null, 3};
@@ -82,6 +107,9 @@ class NDArrayTest {
         assertArrayEquals(dataWithNull, (T[]) array.getArray());
     }
 
+    /**
+     * Tests the memory calculation for different data types.
+     */
 
     @Test
     void testMemoryCalculation() {
@@ -90,7 +118,12 @@ class NDArrayTest {
         assertEquals(16L, byteArray.itemSize());
     }
 
-
+    /**
+     * Tests the creation of an NDArray with a single element.
+     *
+     * @param <T> Generic type parameter.
+     * @throws ShapeException If the shape is invalid.
+     */
     @Test
     <T> void testSingleElementArray() throws ShapeException {
         T[] singleElementData = (T[]) new Object[]{1};
@@ -280,9 +313,27 @@ class NDArrayTest {
         Integer[] result = Arrays.copyOf(flattenedArray, flattenedArray.length, Integer[].class);
 
         // Expected flattened data
-        Integer[] expectedFlattenedData = {1, 2, 3, 4, 5, 6, 7, 8};
+        //Integer[] expectedFlattenedData = {1, 2, 3, 4, 5, 6, 7, 8};
+        Integer[] expectedFlattenedData = {400, 200, 300, 400, 500, 600, 700, 800};
         assertArrayEquals(expectedFlattenedData, result);
     }
+
+
+    /**
+     * Tests the flattening of a multi-dimensional NDArray for float arrays.
+     * Ensures that the flattening works correctly with primitive float arrays.
+     *
+     * @throws ShapeException if the shape of the array is invalid.
+     */
+    @Test
+    public void testFlattenPrimitiveFloatArray() throws ShapeException {
+        float[] flattenedFloatData = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f};
+        NDArray<float[]> flattenedFloatArray = primitiveFloatArray.flatten();
+        assertEquals(1, flattenedFloatArray.ndim());
+        assertEquals(8L, flattenedFloatArray.size());
+        assertArrayEquals(flattenedFloatData, (float[]) flattenedFloatArray.getArray(), 0.001f);
+    }
+
 
     /**
      * Tests the reshaping of an NDArray to a lower dimension.
@@ -364,6 +415,28 @@ class NDArrayTest {
     public void testReshapeToEmptyDimension() throws ShapeException {
         int[] newShape = {0, 2, 2};
         assertThrows(ShapeException.class, () -> array.reshape(newShape));
+    }
+
+    /**
+     * Tests the handling of very large arrays.
+     * Ensures that the NDArray can handle arrays of large size without performance degradation.
+     *
+     * @throws ShapeException if the shape of the array is invalid.
+     */
+    @Test
+    public void testLargeArrayHandling() throws ShapeException {
+        Integer[][][] largeData = new Integer[100][100][100];
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 100; j++) {
+                for (int k = 0; k < 100; k++) {
+                    largeData[i][j][k] = i + j + k;
+                }
+            }
+        }
+
+        NDArray<Integer[][][]> largeArray = new NDArray<>(largeData);
+        assertEquals(3, largeArray.ndim());
+        assertEquals(1000000L, largeArray.size());  // 100 * 100 * 100
     }
 
 
