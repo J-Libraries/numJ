@@ -18,8 +18,19 @@ import java.util.Arrays;
  * 5. Test exception handling.
  * 6. Test edge cases and boundary conditions.
  */
+/**
+ * This class contains unit tests for the NDArray class.
+ * It covers various aspects of NDArray functionality, including creation,
+ * memory calculation, and handling of different data types.
+ *
+ * @author Anmol Raghuvanshi(ershadow786)
+ */
+
 class NDArrayTest {
 
+    /**
+     * Array instances for different data types, initialized in setUp method.
+     */
     private NDArray<Integer[][][]> array;
     private NDArray<int[][][]> primitiveIntArray;
     private NDArray<Float[][][]> floatArray;
@@ -32,6 +43,9 @@ class NDArrayTest {
     private NDArray<Object[][][]> mixedArray;
 
 
+    /**
+     * Initializes array instances with sample data before each test.
+     */
     @BeforeEach
     public void setUp() {
         Integer[][][] data = {{{400, 200}, {300, 400}}, {{500, 600}, {700, 800}}};
@@ -63,7 +77,12 @@ class NDArrayTest {
     }
 
 
-
+    /**
+     * Tests the creation of an empty NDArray.
+     *
+     * @param <T> Generic type parameter.
+     * @throws ShapeException If the shape is invalid.
+     */
     @Test
     <T> void testEmptyArrayCreation() throws ShapeException {
         T[] emptyData = (T[]) new Object[0];
@@ -73,6 +92,12 @@ class NDArrayTest {
         assertArrayEquals(new Object[0], (Object[]) emptyArray.getArray());
     }
 
+    /**
+     * Tests the creation of an NDArray with null values.
+     *
+     * @param <T> Generic type parameter.
+     * @throws ShapeException If the shape is invalid.
+     */
     @Test
     <T> void testArrayWithNullValues() throws ShapeException {
         T[] dataWithNull = (T[]) new Object[]{1, null, 3};
@@ -82,6 +107,9 @@ class NDArrayTest {
         assertArrayEquals(dataWithNull, (T[]) array.getArray());
     }
 
+    /**
+     * Tests the memory calculation for different data types.
+     */
 
     @Test
     void testMemoryCalculation() {
@@ -90,7 +118,12 @@ class NDArrayTest {
         assertEquals(16L, byteArray.itemSize());
     }
 
-
+    /**
+     * Tests the creation of an NDArray with a single element.
+     *
+     * @param <T> Generic type parameter.
+     * @throws ShapeException If the shape is invalid.
+     */
     @Test
     <T> void testSingleElementArray() throws ShapeException {
         T[] singleElementData = (T[]) new Object[]{1};

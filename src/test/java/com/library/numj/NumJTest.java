@@ -16,15 +16,32 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * This class contains unit tests for the NumJ library.
+ * It covers various operations such as array creation, arithmetic operations,
+ * and matrix manipulations. Each method represents a specific test case.
+ *
+ * @author Anmol Raghuvanshi(ershadow786)
+ */
+
 class NumJTest {
 
+    /**
+     * Instance of NumJ to be tested.
+     */
     private NumJ<?> numJ;
 
+    /**
+     * Sets up the NumJ instance before each test.
+     */
     @BeforeEach
     void setUp() {
         numJ = new NumJ<>();
     }
 
+    /**
+     * Tests the default constructor of NumJ.
+     */
     @Test
     void testDefaultConstructor() {
         assertNotNull(numJ.arithmaticOperations);
@@ -32,6 +49,11 @@ class NumJTest {
         assertNotNull(numJ.arrayCreation);
     }
 
+    /**
+     * Tests array creation with a single value.
+     *
+     * @param value The value used to create the array.
+     */
     @ParameterizedTest
     @CsvSource({
             "1, 1",
@@ -48,6 +70,13 @@ class NumJTest {
         assertEquals(value, result.getArray());
     }
 
+    /**
+     * Tests array creation with a given shape and data type.
+     *
+     * @param value The initial value of the array.
+     * @param expectedShape The expected shape of the resulting array.
+     * @param dType The data type of the array elements.
+     */
     @ParameterizedTest
     @MethodSource("provideArrayCreationData")
     <T> void testArrayCreationWithShape(T value, int expectedShape, DType dType) throws Exception {
@@ -61,6 +90,14 @@ class NumJTest {
         assertArrayEquals(shape, result.shape().stream().mapToInt(Integer::intValue).toArray());
     }
 
+
+    /**
+     * Tests zeros array creation with different shapes and data types.
+     *
+     * @param zeroValue The zero value for the array.
+     * @param shape The shape of the resulting array.
+     * @param dType The data type of the array elements.
+     */
     @ParameterizedTest
     @MethodSource("provideDataForZerosAndOnes")
     <T> void testZerosCreation(T zeroValue, int[] shape, DType dType) throws Exception {
@@ -71,6 +108,14 @@ class NumJTest {
         assertArrayEquals((Object[]) java.util.Collections.nCopies(shape[0] * shape[1], zeroValue).toArray(), (Object[]) result.flatten().getArray());
     }
 
+
+    /**
+     * Tests ones array creation with different shapes and data types.
+     *
+     * @param oneValue The one value for the array.
+     * @param shape The shape of the resulting array.
+     * @param dType The data type of the array elements.
+     */
 
     @ParameterizedTest
     @MethodSource("provideDataForZerosAndOnes")
@@ -83,6 +128,13 @@ class NumJTest {
     }
 
 
+    /**
+     * Tests arange function with different parameters.
+     *
+     * @param start The starting value of the sequence.
+     * @param end The ending value of the sequence.
+     * @param expectedSize The expected size of the resulting array.
+     */
     @ParameterizedTest
     @CsvSource({
             "0, 5, 5",
@@ -99,6 +151,13 @@ class NumJTest {
     }
 
 
+    /**
+     * Generates expected data for arange tests.
+     *
+     * @param start The starting value of the sequence.
+     * @param end The ending value of the sequence.
+     * @return A list of integers representing the expected arange result.
+     */
     private List<Integer> generateExpectedArangeData(int start, int end) {
         List<Integer> data = new ArrayList<>();
         for (int i = start; i < end; i++) {
@@ -107,7 +166,9 @@ class NumJTest {
         return data;
     }
 
-
+    /**
+     * Tests arange function with shape and skip parameters.
+     */
     @Test
     void testArangeWithShapeAndSkip() throws Exception {
         int[] shape = {3};
@@ -125,6 +186,13 @@ class NumJTest {
         assertArrayEquals(expected, result.data());
     }*/
 
+    /**
+     * Tests addition operation between two arrays.
+     *
+     * @param data1 The first array for addition.
+     * @param data2 The second array for addition.
+     * @param expected The expected result of the addition.
+     */
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
     <T> void testAddition(T data1, T data2, T expected) throws Exception {
@@ -135,6 +203,13 @@ class NumJTest {
         assertArrayEquals((Object[]) expected, (Object[]) result.getArray());
     }
 
+    /**
+     * Tests addition operation between two arrays.
+     *
+     * @param data1 The first array for Subtraction.
+     * @param data2 The second array for Subtraction.
+     * @param expected The expected result of the Subtraction.
+     */
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
     <T> void testSubtraction(T data1, T data2, T expected) throws Exception {
@@ -144,6 +219,13 @@ class NumJTest {
         NDArray<T> result = numJ.subtract(arr1, arr2);
         assertArrayEquals((Object[]) expected, (Object[]) result.getArray());
     }
+    /**
+     * Tests addition operation between two arrays.
+     *
+     * @param data1 The first array for Multiplication.
+     * @param data2 The second array for Multiplication.
+     * @param expected The expected result of the Multiplication.
+     */
 
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
@@ -155,6 +237,13 @@ class NumJTest {
         assertArrayEquals((Object[]) expected, (Object[]) result.getArray());
     }
 
+    /**
+     * Tests addition operation between two arrays.
+     *
+     * @param data1 The first array for division.
+     * @param data2 The second array for division.
+     * @param expected The expected result of the division.
+     */
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
     <T> void testDivision(T data1, T data2, T expected) throws Exception {
@@ -166,6 +255,12 @@ class NumJTest {
     }
 
 
+    /**
+     * Tests the transpose operation on an array.
+     *
+     * @param data The input array to be transposed.
+     * @param expected The expected result after transposing.
+     */
     @ParameterizedTest
     @MethodSource("provideDataForTranspose")
    <T> void testTranspose(T data , T expected) throws Exception {
@@ -175,6 +270,9 @@ class NumJTest {
         assertArrayEquals((Object[]) expected, (Object[]) transposed.getArray());
     }
 
+    /**
+     * Tests that an IllegalArgumentException is thrown when creating an arange with a negative range.
+     */
     @Test
     void testArangeWithNegativeRange() {
         assertThrows(IllegalArgumentException.class, () -> {
@@ -182,6 +280,11 @@ class NumJTest {
         }, "Expected IllegalArgumentException when range is negative");
     }
 
+    /**
+     * Tests that a ShapeException is thrown when creating zeros array with an invalid shape.
+     *
+     * @param dType The data type of the array elements.
+     */
     @ParameterizedTest
     @MethodSource("provideDataForZeros")
     <T> void testZerosWithInvalidShape(DType dType) {
@@ -192,7 +295,9 @@ class NumJTest {
         }, "Expected ShapeException for invalid shape");
     }
 
-
+    /**
+     * Tests that an IllegalArgumentException is thrown when creating eye matrix with an invalid diagonal index.
+     */
     @Test
     void testEyeWithInvalidDiagonal() {
         assertThrows(IllegalArgumentException.class, () -> {
@@ -200,6 +305,12 @@ class NumJTest {
         }, "Expected IllegalArgumentException for invalid diagonal index");
     }
 
+    /**
+     * Tests that a ShapeException is thrown when adding arrays with mismatched shapes.
+     *
+     * @param data1 The first array for addition.
+     * @param data2 The second array for addition.
+     */
     @ParameterizedTest
     @MethodSource("provideDataForAddition")
     <T> void testAdditionWithMismatchedShapes(T data1, T data2) throws ShapeException {
@@ -213,6 +324,12 @@ class NumJTest {
         }, "Expected ShapeException for mismatched shapes");
     }
 
+    /**
+     * Tests that an ArithmeticException is thrown when dividing by zero.
+     *
+     * @param data1 The dividend array.
+     * @param data2 The divisor array.
+     */
     @ParameterizedTest
     @MethodSource("provideDataForDivision")
     <T> void testDivisionByZero(T data1, T data2) throws ShapeException {
@@ -227,6 +344,9 @@ class NumJTest {
         }, "Expected ArithmeticException for division by zero");
     }
 
+    /**
+     * Tests that a ShapeException is thrown when creating zeros array with an empty shape.
+     */
     @Test
     public void testZerosWithEmptyShape() {
         NumJ<Integer> numJ = new NumJ<>();
@@ -236,6 +356,11 @@ class NumJTest {
         });
     }
 
+    /**
+     * Tests arange function with zero skip parameter.
+     *
+     * @throws ShapeException If the shape is invalid.
+     */
     @Test
     public void testArangeWithZeroSkip() throws ShapeException {
         NumJ<Integer[]> numJ = new NumJ<>();
@@ -245,6 +370,11 @@ class NumJTest {
 
 
 
+    /**
+     * Provides data for zeros array creation tests.
+     *
+     * @return A stream of arguments for testing zeros creation.
+     */
     static Stream<Arguments> provideDataForZerosAndOnes() {
         return Stream.of(
                 Arguments.of(0, new int[]{2, 2}, DType.INT32),
