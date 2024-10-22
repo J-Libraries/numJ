@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,14 +30,14 @@ class NumJTest {
     /**
      * Instance of NumJ to be tested.
      */
-    private NumJ<?> numJ;
+    private NumJ numJ;
 
     /**
      * Sets up the NumJ instance before each test.
      */
     @BeforeEach
     void setUp() {
-        numJ = new NumJ<>();
+        numJ = new NumJ();
     }
 
     /**
@@ -61,7 +62,7 @@ class NumJTest {
             "3, 1"
     })
     <T> void testArrayCreationWithSingleValue(T value) throws Exception {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         NDArray<Integer> result = numJ.array(value);
         assertNotNull(result);
         assertEquals(1, result.ndim());
@@ -80,7 +81,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideArrayCreationData")
     <T> void testArrayCreationWithShape(T value, int expectedShape, DType dType) throws Exception {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         int[] shape = {expectedShape, expectedShape};
 
         NDArray<T> result = numJ.array(value, shape, 2, dType);
@@ -101,7 +102,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForZerosAndOnes")
     <T> void testZerosCreation(T zeroValue, int[] shape, DType dType) throws Exception {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         NDArray<T> result = numJ.zeros(shape, dType);
         assertNotNull(result);
         assertEquals(2, result.ndim());
@@ -120,7 +121,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForZerosAndOnes")
     <T> void testOnesCreation(T oneValue, int[] shape, DType dType) throws Exception {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         NDArray<T> result = numJ.ones(shape, dType);
         assertNotNull(result);
         assertEquals(2, result.ndim());
@@ -196,7 +197,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
     <T> void testAddition(T data1, T data2, T expected) throws Exception {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
         NDArray<T> result = numJ.add(arr1, arr2);
@@ -213,7 +214,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
     <T> void testSubtraction(T data1, T data2, T expected) throws Exception {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
         NDArray<T> result = numJ.subtract(arr1, arr2);
@@ -230,7 +231,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
     <T> void testMultiplication(T data1, T data2, T expected) throws Exception {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
         NDArray<T> result = numJ.multiply(arr1, arr2);
@@ -247,7 +248,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForArithmeticOperations")
     <T> void testDivision(T data1, T data2, T expected) throws Exception {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
         NDArray<T> result = numJ.divide(arr1, arr2);
@@ -264,7 +265,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForTranspose")
    <T> void testTranspose(T data , T expected) throws Exception {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         NDArray<T> arr = numJ.array(data);
         NDArray<T> transposed = numJ.transpose(arr);
         assertArrayEquals((Object[]) expected, (Object[]) transposed.getArray());
@@ -288,7 +289,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForZeros")
     <T> void testZerosWithInvalidShape(DType dType) {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         int[] invalidShape = {0, 2};  // Invalid dimension
         assertThrows(ShapeException.class, () -> {
             numJ.zeros(invalidShape, dType);
@@ -314,7 +315,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForAddition")
     <T> void testAdditionWithMismatchedShapes(T data1, T data2) throws ShapeException {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
 
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
@@ -333,7 +334,7 @@ class NumJTest {
     @ParameterizedTest
     @MethodSource("provideDataForDivision")
     <T> void testDivisionByZero(T data1, T data2) throws ShapeException {
-        NumJ<T> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
 
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
@@ -349,7 +350,7 @@ class NumJTest {
      */
     @Test
     public void testZerosWithEmptyShape() {
-        NumJ<Integer> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         int[] emptyShape = {};
         assertThrows(ShapeException.class, () -> {
             numJ.zeros(emptyShape);
@@ -363,7 +364,7 @@ class NumJTest {
      */
     @Test
     public void testArangeWithZeroSkip() throws ShapeException {
-        NumJ<Integer[]> numJ = new NumJ<>();
+        NumJ numJ = new NumJ();
         NDArray<Integer[]> result = numJ.arange(0, 5, DType.INT32, 0);
         assertArrayEquals(new Integer[]{0, 1, 2, 3, 4}, result.getArray());
     }
