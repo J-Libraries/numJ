@@ -93,9 +93,8 @@ public class ArithmaticOperations {
             if (flatArr1[arr1FlatIndex] instanceof Number && flatArr2[arr2FlatIndex] instanceof Number) {
                 Number v1 = (Number) flatArr1[arr1FlatIndex];
                 Number v2 = (Number) flatArr2[arr2FlatIndex];
-
-                boolean isFloatingPoint = (v1 instanceof Double || v1 instanceof Float || v2 instanceof Double || v2 instanceof Float);
-                outputArray[i] = (R) (isFloatingPoint ? getFloatingPointResult(v1, v2, operation) : getNumericResult(v1, v2, operation));
+//                boolean isFloatingPoint = (v1 instanceof Double || v1 instanceof Float || v2 instanceof Double || v2 instanceof Float);
+                outputArray[i] = (R) getResult(v1, v2, operation);//(isFloatingPoint ? getFloatingPointResult(v1, v2, operation) : getNumericResult(v1, v2, operation));
             } else {
                 outputArray[i] = (R) stringOperation(flatArr1[arr1FlatIndex].toString(), flatArr2[arr2FlatIndex].toString(), operation);
             }
@@ -152,30 +151,39 @@ public class ArithmaticOperations {
      * @return The result of the operation as a {@code Number}.
      */
     private Number getTypedValue(Number v1, Number v2, Number dominating, OperationType o) {
+
         switch (o) {
             case ADDITION:
                 return dominating instanceof Byte ? v1.byteValue() + v2.byteValue() :
                         dominating instanceof Short ? v1.shortValue() + v2.shortValue() :
                                 dominating instanceof Integer ? v1.intValue() + v2.intValue() :
-                                        v1.longValue() + v2.longValue();
+                                        dominating instanceof Float ? v1.floatValue() + v2.floatValue() :
+                                                dominating instanceof Double ? v1.doubleValue() + v2.doubleValue() :
+                                                        v1.longValue() + v2.longValue();
 
             case SUBTRACTION:
                 return dominating instanceof Byte ? v1.byteValue() - v2.byteValue() :
                         dominating instanceof Short ? v1.shortValue() - v2.shortValue() :
                                 dominating instanceof Integer ? v1.intValue() - v2.intValue() :
-                                        v1.longValue() - v2.longValue();
+                                        dominating instanceof Float ? v1.floatValue() - v2.floatValue() :
+                                                dominating instanceof Double ? v1.doubleValue() - v2.doubleValue() :
+                                                        v1.longValue() - v2.longValue();
 
             case MULTIPLICATION:
-                return dominating instanceof Byte ? ((short) v1.byteValue() << v2.byteValue()) :
-                        dominating instanceof Short ? ((int) v1.shortValue() << v2.shortValue()) :
-                                dominating instanceof Integer ? ((long) v1.intValue() << v2.intValue()) :
-                                        v1.longValue() << v2.longValue();
+                return dominating instanceof Byte ? ((short) v1.byteValue() * v2.byteValue()) :
+                        dominating instanceof Short ? ((int) v1.shortValue() * v2.shortValue()) :
+                                dominating instanceof Integer ? ((long)v1.intValue() * v2.intValue()) :
+                                        dominating instanceof Float ? v1.floatValue() * v2.floatValue() :
+                                                dominating instanceof Double ? v1.doubleValue() * v2.doubleValue() :
+                                                        v1.longValue() * v2.longValue();
 
             case DIVISION:
-                return dominating instanceof Byte ? (v1.byteValue() >> v2.byteValue()) :
-                        dominating instanceof Short ? (v1.shortValue() >> v2.shortValue()) :
-                                dominating instanceof Integer ? (v1.intValue() >> v2.intValue()) :
-                                        v1.longValue() >> v2.longValue();
+                return dominating instanceof Byte ? (v1.byteValue() / v2.byteValue()) :
+                        dominating instanceof Short ? (v1.shortValue() / v2.shortValue()) :
+                                dominating instanceof Integer ? (v1.intValue() / v2.intValue()) :
+                                        dominating instanceof Float ? v1.floatValue() / v2.floatValue() :
+                                                dominating instanceof Double ? v1.doubleValue() / v2.doubleValue() :
+                                                        v1.longValue() / v2.longValue();
 
             case MODULO:
                 return dominating instanceof Byte ? v1.byteValue() % v2.byteValue() :
@@ -197,6 +205,14 @@ public class ArithmaticOperations {
      * @param o  The operation type.
      * @return The result of the operation as a {@code Number}.
      */
+    private Number getResult(Number v1, Number v2, OperationType o)
+    {
+        if (utils.getElementSize(v1.getClass()) > utils.getElementSize(v2.getClass())) {
+            return getTypedValue(v1, v2, v1, o);
+        } else {
+            return getTypedValue(v1, v2, v2, o);
+        }
+    }
     private Number getNumericResult(Number v1, Number v2, OperationType o) {
         if (utils.getElementSize(v1.getClass()) > utils.getElementSize(v2.getClass())) {
             return getTypedValue(v1, v2, v1, o);

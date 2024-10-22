@@ -17,13 +17,21 @@ public class App
      */
     public static void main( String[] args ) throws ShapeException {
         System.out.println( "Hello World!" );
+//        test();/
         testArrayCreationOperations();
+    }
+    private  static <T> void test()
+    {
+        T n1 = (T) Integer.valueOf(10);
+        T n2 = (T) Integer.valueOf(10);
+        Number out = ((Number)n1).intValue() + ((Number)n2).intValue();
+        System.out.println(out.getClass().getName());
     }
     private static void testArrayCreationOperations() throws ShapeException {
         NumJ numJ = new NumJ();
-        Integer[][][] arrayData = {
+        int[][][] arrayData = {
                 {
-                        {2,5},
+                        {1, 2},
                         {4,6},
                         {3,5}
                 },
@@ -38,16 +46,11 @@ public class App
                         {11,12}
                 }
         };
-        NDArray<Integer[]> arr = numJ.array(arrayData);
-        arr.printArray();
-        NDArray<Integer[]> arr1 = numJ.arange(100);
-//        arr1.printArray();
 
-        NDArray<Integer[][]> arr2 = numJ.zeros(new int[]{3,3});
-        NDArray<Integer[][]> arr3 = numJ.ones(new int[]{3,3});
-        NDArray<Integer[][]> arr4 = numJ.subtract(arr2, arr3);
-        arr4.printArray();
-
+        NDArray arr1 = numJ.ones(new int[]{2});
+        NDArray arr2 = numJ.ones(new int[]{2});
+        NDArray arr3 = numJ.add(arr1, arr2);
+        arr3.printArray();
 
     }
 }
