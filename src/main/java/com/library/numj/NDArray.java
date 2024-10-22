@@ -6,6 +6,7 @@ import com.library.numj.exceptions.ShapeException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EmptyStackException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -35,7 +36,7 @@ public final class NDArray<T> {
 	Utils utils;
 	/** Data Type of current array */
 	DType dType = DType.INT8;
-	int elementSize = 0;
+	int elementSize = 1;
 	/**
 	 * Constructs an NDArray from the given data array.
 	 *
@@ -44,6 +45,14 @@ public final class NDArray<T> {
 	 */
 	NDArray(T data) throws ShapeException {
 		utils = new Utils();
+
+
+		if(utils.isValue(data))
+		{
+			this.array = data;
+			this.size = 1;
+			return;
+		}
 		calculateDimensions(data, 0);
 		calculateSize();
 		int[] arrayShape = shape.stream().mapToInt(Integer::intValue).toArray();
@@ -99,6 +108,14 @@ public final class NDArray<T> {
 			if (element != null && element.getClass().isArray()) {
 				Array.set(newArray, i, createDeepCopy(element));
 			} else {
+				if(!(element instanceof  String))
+				{
+					Class<?> tempClass = array.getClass().getComponentType();
+					this.dType = dType.fromSize(utils.getElementSize(tempClass == null ? Object.class : tempClass), utils.isFloatingPoint(element));
+				}
+				else{
+					this.dType = DType.OBJECT;
+				}
 				Array.set(newArray, i, element);
 			}
 		});
@@ -130,18 +147,42 @@ public final class NDArray<T> {
 		if (!arr.getClass().isArray()) {
 			return ndim;
 		}
-		if(arr.getClass().isPrimitive())
+		if(utils.isPrimitive(arr))
 		{
-			Arrays.stream((T[])arr).parallel().forEach(value->{
-
-				if(value instanceof Number)
+			for(int i = 0; i<Array.getLength(arr);i++)
+			{
+				T value = (T)Array.get(arr, i);
+				if(value == null)
 				{
-
+					elementSize = 16;
+					this.dType = DType.OBJECT;
+				}
+				else{
 					elementSize = Math.max(elementSize, utils.getElementSize(value.getClass()));
-
 					this.dType = dType.fromSize(elementSize, (value instanceof Double || value instanceof Float));
 				}
-			});
+
+			}
+//			Class<?> classType = Array.get(arr, 0).getClass();
+//			if(utils.isValue(classType))
+//			{
+//				Arrays.stream((T[])arr).parallel().forEach(value->{
+//					if(value instanceof Number || value instanceof String)
+//					{
+//						elementSize = Math.max(elementSize, utils.getElementSize(value.getClass()));
+//						this.dType = dType.fromSize(elementSize, (value instanceof Double || value instanceof Float));
+//					}
+//				});
+//			}
+//			else{
+//				for(int i = 0; i<Array.getLength(arr);i++)
+//				{
+//					T value = (T)Array.get(arr, i);
+//					elementSize = Math.max(elementSize, utils.getElementSize(value.getClass()));
+//					this.dType = dType.fromSize(elementSize, (value instanceof Double || value instanceof Float));
+//				}
+//			}
+
 		}
 		int length = Array.getLength(arr);
 
@@ -272,8 +313,9 @@ public final class NDArray<T> {
 			}
 
 			System.out.println("],");
-		}
-		else{
+		} else if (utils.isValue(array)) {
+			System.out.println(array);
+		} else{
 			System.out.println(indent + "[");
 			for(int i = 0;i<Array.getLength(array);i++)
 			{
@@ -348,7 +390,7 @@ public final class NDArray<T> {
 	 */
 	public <R> NDArray<R> flatten() throws ShapeException {
 		R flatArray = (R) Array.newInstance(dType.is(), (int)this.size);
-		Arrays.fill((R[])flatArray, 0);
+		Arrays.fill((R[])flatArray, dType.getDefaultValue());
 		flattenRecursive(this.array, flatArray, 0);
 		this.index = 0;
 		return new NDArray<>(flatArray);
@@ -365,6 +407,9 @@ public final class NDArray<T> {
 		long newSize = Arrays.stream(newShape)
 				.asLongStream()
 				.reduce(1, (a, b) -> a * b);
+
+
+
 
 		if (this.size != newSize) {
 			throw new ShapeException(ExceptionMessages.shapeMismatchedException(size, Arrays.toString(newShape)));
@@ -431,5 +476,10 @@ public final class NDArray<T> {
 			stride *= shape.get(i);
 		}
 		return strides;
+	}
+
+	public DType type()
+	{
+		return this.dType;
 	}
 }

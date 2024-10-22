@@ -111,5 +111,10 @@ public final class ExceptionMessages {
 				" could not be smaller than the number of rows " + rows;
 	}
 
+	public static String emptyShapeException(int... shape)
+	{
+		return "Invalid Shape Exception: Shape could not be empty "+Arrays.toString(shape);
+	}
+
 
 }

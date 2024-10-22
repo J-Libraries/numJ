@@ -17,12 +17,20 @@ public final class Utils {
     /** Map containing the size in bytes of various numeric classes. */
     static Map<Class<?>, Integer> classSizeMap = new HashMap<>();
     static {
+        classSizeMap.put(String.class, 16);
+        classSizeMap.put(Object.class, 16);
         classSizeMap.put(Integer.class, 4);
         classSizeMap.put(Long.class, 8);
         classSizeMap.put(Double.class, 8);
         classSizeMap.put(Float.class, 4);
         classSizeMap.put(Short.class, 2);
         classSizeMap.put(Byte.class, 1);
+        classSizeMap.put(int.class, 4);
+        classSizeMap.put(long.class, 8);
+        classSizeMap.put(double.class, 8);
+        classSizeMap.put(float.class, 4);
+        classSizeMap.put(short.class, 2);
+        classSizeMap.put(byte.class, 1);
     }
 
     /**
@@ -62,6 +70,7 @@ public final class Utils {
      * @throws IllegalArgumentException if the class type is unsupported.
      */
     public int getElementSize(Class<?> clazz) {
+
         if (classSizeMap.containsKey(clazz)) {
             return classSizeMap.get(clazz);
         } else {
@@ -109,10 +118,12 @@ public final class Utils {
         }
         return componenetType;
     }
-    public <T> boolean isPrimitive(Object array)
+    public boolean isPrimitive(Object array)
     {
+
         if(array.getClass().isArray())
         {
+            if(Array.getLength(array) <= 0) return  true;
             Object value = Array.get(array, 0);
             return (value instanceof Number || value instanceof String
                     || (array.getClass().getComponentType() != null && array.getClass().getComponentType().isPrimitive()));
@@ -123,4 +134,5 @@ public final class Utils {
     {
         return (value instanceof Number || value instanceof String);
     }
+    public boolean isFloatingPoint(Object value){return (value instanceof Float || value instanceof Double);}
 }

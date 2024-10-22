@@ -58,7 +58,7 @@ public class NumJ {
 	 * @return An NDArray filled with zeros.
 	 */
 	public <T> NDArray<T> zeros(int[] shape) {
-		return (NDArray<T>) zeros(shape, DType.INT32, Order.C);
+		return  zeros(shape, DType.INT32, Order.C);
 	}
 
 
@@ -171,30 +171,30 @@ public class NumJ {
 	}
 
 	/**
-	 * Generates an NDArray with a range of integers from start up to (but not including) end, with a specified skip.
+	 * Generates an NDArray with a range of integers from start up to (but not including) end, with a specified step.
 	 *
 	 * @param start The starting value (inclusive).
 	 * @param end   The end value (exclusive).
-	 * @param skip  The step size for the range.
-	 * @return An NDArray containing integers from start to end - 1 with a step size of skip.
+	 * @param step  The step size for the range.
+	 * @return An NDArray containing integers from start to end - 1 with a step size of step.
 	 * @throws ShapeException If there is an issue creating the NDArray.
 	 */
-	public <T> NDArray<T> arange(int start, int end, int skip) throws ShapeException {
-		return arange(start, end, DType.INT32, skip);
+	public <T> NDArray<T> arange(int start, int end, int step) throws ShapeException {
+		return arange(start, end, DType.INT32, step);
 	}
 
 	/**
-	 * Generates an NDArray with a range of integers from start up to (but not including) end, with a specific shape and skip.
+	 * Generates an NDArray with a range of integers from start up to (but not including) end, with a specific shape and step.
 	 *
 	 * @param start The starting value (inclusive).
 	 * @param end   The end value (exclusive).
-	 * @param skip  The step size for the range.
+	 * @param step  The step size for the range.
 	 * @param shape The shape of the resulting NDArray.
-	 * @return An NDArray containing integers from start to end - 1 with a step size of skip.
+	 * @return An NDArray containing integers from start to end - 1 with a step size of step.
 	 * @throws ShapeException If there is an issue creating the NDArray.
 	 */
-	public <T> NDArray<T> arange(int start, int end, int skip, int[] shape) throws ShapeException {
-		return arange(start, end, DType.INT32, skip, shape);
+	public <T> NDArray<T> arange(int start, int end, int step, int[] shape) throws ShapeException {
+		return arange(start, end, DType.INT32, step, shape);
 	}
 
 	/**
@@ -226,38 +226,38 @@ public class NumJ {
 	}
 
 	/**
-	 * Generates an NDArray with a range of numbers from start up to (but not including) end, cast to the specified data type and skip value.
+	 * Generates an NDArray with a range of numbers from start up to (but not including) end, cast to the specified data type and step value.
 	 *
 	 * @param start  The starting value (inclusive).
 	 * @param end    The end value (exclusive).
 	 * @param dType  The data type of the elements in the array.
-	 * @param skip   The step size for the range.
+	 * @param step   The step size for the range.
 	 * @return An NDArray containing numbers from start to end - 1, cast to the specified data type and step size.
 	 * @throws ShapeException If there is an issue creating the NDArray.
 	 */
-	public <T> NDArray<T> arange(int start, int end, DType dType, int skip) throws ShapeException {
-		if(skip < 0)
-			throw new IllegalArgumentException(ExceptionMessages.negativeSkipException(skip));
-		int size = (int)Math.ceil(((double)(end - start)) / (skip == 0 ? 1 : skip+1));
-		return arange(start, end, dType, skip, new int[]{size});
+	public <T> NDArray<T> arange(int start, int end, DType dType, int step) throws ShapeException {
+		if(step < 0)
+			throw new IllegalArgumentException(ExceptionMessages.negativeSkipException(step));
+		int size = (int)Math.ceil(((double)(end - start)) / (step == 0 ? 1 : step+1));
+		return arange(start, end, dType, step, new int[]{size});
 	}
 
 	/**
-	 * Generates an NDArray with a range of numbers from start up to (but not including) end, cast to the specified data type, skip value, and shape.
+	 * Generates an NDArray with a range of numbers from start up to (but not including) end, cast to the specified data type, step value, and shape.
 	 *
 	 * @param start  The starting value (inclusive).
 	 * @param end    The end value (exclusive).
 	 * @param dType  The data type of the elements in the array.
-	 * @param skip   The step size for the range.
+	 * @param step   The step size for the range.
 	 * @param shape  The shape of the resulting NDArray.
 	 * @return An NDArray containing numbers from start to end - 1, cast to the specified data type, step size, and shape.
 	 * @throws ShapeException If there is an issue creating the NDArray.
 	 * @throws IllegalArgumentException If the size is negative or the shape does not match the size.
 	 */
-	public <T> NDArray<T> arange(int start, int end, DType dType, int skip, int[] shape) throws ShapeException {
-		if(skip < 0)
-			throw new IllegalArgumentException(ExceptionMessages.negativeSkipException(skip));
-		int size = (int)Math.ceil(((double)(end - start)) / (skip == 0 ? 1 : skip+1));
+	public <T> NDArray<T> arange(int start, int end, DType dType, int step, int[] shape) throws ShapeException {
+		if(step < 0)
+			throw new IllegalArgumentException(ExceptionMessages.negativeSkipException(step));
+		int size = (int)Math.ceil(((double)(end - start)) / (step == 0 ? 1 : step));
 		if(size<0)
 			throw new IllegalArgumentException(ExceptionMessages.negativeSizeException(size));
 		if (shape.length != 0 && size != Arrays.stream(shape).reduce(1, (a, b) -> (a * b)))
@@ -266,7 +266,7 @@ public class NumJ {
 
 		final Class<?> dataType = dType.is();
 		T arr = (T) Array.newInstance(dataType, size);
-		Arrays.parallelSetAll((T[]) arr, i -> i == 0 ? i + start : start + (skip+1)*i);
+		Arrays.parallelSetAll((T[]) arr, i -> i == 0 ? i + start : start + (step == 0 ? i : step*i));
 		return shape.length == 1 ? new NDArray<>(arr)
 				: new NDArray<>(arr).reshape(shape);
 	}
