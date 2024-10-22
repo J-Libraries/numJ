@@ -27,7 +27,7 @@ public class ArrayModification {
         }
 
         R transposedArray =
-                transposeRecursive(array, axes, new int[0], utils.getComponentType(array.getArray()));
+                transposeRecursive(array, axes, new int[0], array.type().is());
         return new NumJ().array(transposedArray);
     }
 

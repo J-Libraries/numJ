@@ -1,8 +1,10 @@
 package com.library.numj.operations;
 
+import com.library.numj.ExceptionMessages;
 import com.library.numj.NDArray;
 import com.library.numj.NumJ;
 import com.library.numj.enums.DType;
+import com.library.numj.exceptions.InvalidShapeException;
 import com.library.numj.exceptions.ShapeException;
 
 import java.lang.reflect.Array;
@@ -51,6 +53,7 @@ public class ArrayCreation {
      * @return An NDArray filled with zeros.
      */
     public <T> NDArray<T> zeros(int[] shape, DType dType) {
+        if(shape.length == 0) throw new InvalidShapeException(ExceptionMessages.emptyShapeException(shape));
         T array = (T) Array.newInstance(dType.is(), shape);
         return new NumJ().array(fillRecursive(array, dType, 0), shape, shape.length, dType);
     }
@@ -63,6 +66,7 @@ public class ArrayCreation {
      * @return An NDArray filled with ones.
      */
     public <T> NDArray<T> ones(int[] shape, DType dType) {
+        if(shape.length == 0) throw new InvalidShapeException(ExceptionMessages.emptyShapeException(shape));
         T array = (T) Array.newInstance(dType.is(), shape);
         return new NumJ().array(fillRecursive(array, dType, 1), shape, shape.length, dType);
     }
