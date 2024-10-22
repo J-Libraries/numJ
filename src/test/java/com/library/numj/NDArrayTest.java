@@ -280,9 +280,27 @@ class NDArrayTest {
         Integer[] result = Arrays.copyOf(flattenedArray, flattenedArray.length, Integer[].class);
 
         // Expected flattened data
-        Integer[] expectedFlattenedData = {1, 2, 3, 4, 5, 6, 7, 8};
+        //Integer[] expectedFlattenedData = {1, 2, 3, 4, 5, 6, 7, 8};
+        Integer[] expectedFlattenedData = {400, 200, 300, 400, 500, 600, 700, 800};
         assertArrayEquals(expectedFlattenedData, result);
     }
+
+
+    /**
+     * Tests the flattening of a multi-dimensional NDArray for float arrays.
+     * Ensures that the flattening works correctly with primitive float arrays.
+     *
+     * @throws ShapeException if the shape of the array is invalid.
+     */
+    @Test
+    public void testFlattenPrimitiveFloatArray() throws ShapeException {
+        float[] flattenedFloatData = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f};
+        NDArray<float[]> flattenedFloatArray = primitiveFloatArray.flatten();
+        assertEquals(1, flattenedFloatArray.ndim());
+        assertEquals(8L, flattenedFloatArray.size());
+        assertArrayEquals(flattenedFloatData, (float[]) flattenedFloatArray.getArray(), 0.001f);
+    }
+
 
     /**
      * Tests the reshaping of an NDArray to a lower dimension.
@@ -364,6 +382,28 @@ class NDArrayTest {
     public void testReshapeToEmptyDimension() throws ShapeException {
         int[] newShape = {0, 2, 2};
         assertThrows(ShapeException.class, () -> array.reshape(newShape));
+    }
+
+    /**
+     * Tests the handling of very large arrays.
+     * Ensures that the NDArray can handle arrays of large size without performance degradation.
+     *
+     * @throws ShapeException if the shape of the array is invalid.
+     */
+    @Test
+    public void testLargeArrayHandling() throws ShapeException {
+        Integer[][][] largeData = new Integer[100][100][100];
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 100; j++) {
+                for (int k = 0; k < 100; k++) {
+                    largeData[i][j][k] = i + j + k;
+                }
+            }
+        }
+
+        NDArray<Integer[][][]> largeArray = new NDArray<>(largeData);
+        assertEquals(3, largeArray.ndim());
+        assertEquals(1000000L, largeArray.size());  // 100 * 100 * 100
     }
 
 

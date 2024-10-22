@@ -227,6 +227,24 @@ class NumJTest {
         }, "Expected ArithmeticException for division by zero");
     }
 
+    @Test
+    public void testZerosWithEmptyShape() {
+        NumJ<Integer> numJ = new NumJ<>();
+        int[] emptyShape = {};
+        assertThrows(ShapeException.class, () -> {
+            numJ.zeros(emptyShape);
+        });
+    }
+
+    @Test
+    public void testArangeWithZeroSkip() throws ShapeException {
+        NumJ<Integer[]> numJ = new NumJ<>();
+        NDArray<Integer[]> result = numJ.arange(0, 5, DType.INT32, 0);
+        assertArrayEquals(new Integer[]{0, 1, 2, 3, 4}, result.getArray());
+    }
+
+
+
     static Stream<Arguments> provideDataForZerosAndOnes() {
         return Stream.of(
                 Arguments.of(0, new int[]{2, 2}, DType.INT32),
