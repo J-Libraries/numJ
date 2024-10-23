@@ -38,9 +38,8 @@ public class ArrayModification {
      * @param axes           The order of axes for transposition.
      * @param currentIndices The current indices during recursion.
      * @return The transposed array.
-     * @throws ShapeException If an error occurs during transposition.
      */
-    private <T, R> R transposeRecursive(NDArray<T> array, int[] axes, int[] currentIndices,Class<?> type) throws ShapeException {
+    private <T, R> R transposeRecursive(NDArray<T> array, int[] axes, int[] currentIndices,Class<?> type) {
         int ndim = array.ndim();
         if (currentIndices.length == ndim) {
             int[] originalIndices = new int[ndim];
@@ -59,8 +58,8 @@ public class ArrayModification {
             for (int i = 0; i < dimSize; i++) {
                 int[] newIndices = Arrays.copyOf(currentIndices, currentIndices.length + 1);
                 newIndices[currentIndices.length] = i;
-                R value = transposeRecursive(array, axes, newIndices, type);
-                Array.set(newArr, i, value);
+                R value = transposeRecursive(array, axes, newIndices, newArr.getClass());
+                Array.set(Array.get(newArr, axis), i, value);
             }
             return newArr;
         }
