@@ -469,7 +469,7 @@ public final class NDArray<T> {
 	 */
 	public int[] strides() {
 		int[] strides = new int[shape.size()];
-		int stride = utils.getElementSize(shape.get(0).getClass());
+		int stride = utils.getElementSize(dType.is());//shape.get(0).getClass()
 
 		for (int i = shape.size() - 1; i >= 0; i--) {
 			strides[i] = stride;
