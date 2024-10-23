@@ -1,6 +1,7 @@
 package com.library.numj;
 
 import com.library.numj.enums.DType;
+import com.library.numj.exceptions.InvalidShapeException;
 import com.library.numj.exceptions.ShapeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,8 +12,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -64,7 +67,7 @@ class NumJTest {
         NumJ numJ = new NumJ();
         NDArray<Integer> result = numJ.array(value);
         assertNotNull(result);
-        assertEquals(1, result.ndim());
+        assertEquals(0, result.ndim());
         assertEquals(1L, result.size());
         //assertArrayEquals(new Integer[]{value}, (Integer[]) result.getArray());
         assertEquals(value, result.getArray());
@@ -105,7 +108,7 @@ class NumJTest {
         NDArray<T> result = numJ.zeros(shape, dType);
         assertNotNull(result);
         assertEquals(2, result.ndim());
-        assertArrayEquals((Object[]) java.util.Collections.nCopies(shape[0] * shape[1], zeroValue).toArray(), (Object[]) result.flatten().getArray());
+        assertArrayEquals((Object[]) Collections.nCopies(shape[0] * shape[1], zeroValue).toArray(), (Object[]) result.flatten().getArray());
     }
 
 
@@ -194,7 +197,8 @@ class NumJTest {
      * @param expected The expected result of the addition.
      */
     @ParameterizedTest
-    @MethodSource("provideDataForArithmeticOperations")
+    //@MethodSource("provideDataForArithmeticOperations")
+    @MethodSource("provideValidDataForAddition")
     <T> void testAddition(T data1, T data2, T expected) throws Exception {
         NumJ numJ = new NumJ();
         NDArray<T> arr1 = numJ.array(data1);
@@ -211,7 +215,8 @@ class NumJTest {
      * @param expected The expected result of the Subtraction.
      */
     @ParameterizedTest
-    @MethodSource("provideDataForArithmeticOperations")
+//    @MethodSource("provideDataForArithmeticOperations")
+    @MethodSource("provideValidDataForSubtraction")
     <T> void testSubtraction(T data1, T data2, T expected) throws Exception {
         NumJ numJ = new NumJ();
         NDArray<T> arr1 = numJ.array(data1);
@@ -228,12 +233,15 @@ class NumJTest {
      */
 
     @ParameterizedTest
-    @MethodSource("provideDataForArithmeticOperations")
+    @MethodSource("provideValidDataForMultiplication")
     <T> void testMultiplication(T data1, T data2, T expected) throws Exception {
         NumJ numJ = new NumJ();
         NDArray<T> arr1 = numJ.array(data1);
         NDArray<T> arr2 = numJ.array(data2);
         NDArray<T> result = numJ.multiply(arr1, arr2);
+        arr1.printArray();
+        arr2.printArray();
+        result.printArray();
         assertArrayEquals((Object[]) expected, (Object[]) result.getArray());
     }
 
@@ -245,7 +253,7 @@ class NumJTest {
      * @param expected The expected result of the division.
      */
     @ParameterizedTest
-    @MethodSource("provideDataForArithmeticOperations")
+    @MethodSource("provideValidDataForDivision")
     <T> void testDivision(T data1, T data2, T expected) throws Exception {
         NumJ numJ = new NumJ();
         NDArray<T> arr1 = numJ.array(data1);
@@ -289,7 +297,7 @@ class NumJTest {
     @MethodSource("provideDataForZeros")
     <T> void testZerosWithInvalidShape(DType dType) {
         NumJ numJ = new NumJ();
-        int[] invalidShape = {0, 2};  // Invalid dimension
+        int[] invalidShape = {0, 2};
         assertThrows(ShapeException.class, () -> {
             numJ.zeros(invalidShape, dType);
         }, "Expected ShapeException for invalid shape");
@@ -351,7 +359,7 @@ class NumJTest {
     public void testZerosWithEmptyShape() {
         NumJ numJ = new NumJ();
         int[] emptyShape = {};
-        assertThrows(ShapeException.class, () -> {
+        assertThrows(InvalidShapeException.class, () -> {
             numJ.zeros(emptyShape);
         });
     }
@@ -383,10 +391,31 @@ class NumJTest {
         );
     }
 
-    static Stream<Arguments> provideDataForArithmeticOperations() {
+    static Stream<Arguments> provideValidDataForAddition() {
         return Stream.of(
                 Arguments.of(new Integer[][]{{1, 2}, {3, 4}}, new Integer[][]{{5, 6}, {7, 8}}, new Integer[][]{{6, 8}, {10, 12}}, DType.INT32),
                 Arguments.of(new Double[][]{{1.0, 2.0}, {3.0, 4.0}}, new Double[][]{{5.0, 6.0}, {7.0, 8.0}}, new Double[][]{{6.0, 8.0}, {10.0, 12.0}}, DType.FLOAT64)
+        );
+    }
+
+    static Stream<Arguments> provideValidDataForMultiplication() {
+        return Stream.of(
+                Arguments.of(new Integer[][]{{1, 2}, {3, 4}}, new Integer[][]{{5, 6}, {7, 8}}, new Integer[][]{{5, 12}, {21, 32}}, DType.INT32),
+                Arguments.of(new Double[][]{{1.0, 2.0}, {3.0, 4.0}}, new Double[][]{{5.0, 6.0}, {7.0, 8.0}}, new Double[][]{{5.0, 12.0}, {21.0, 32.0}}, DType.FLOAT64)
+        );
+    }
+
+    static Stream<Arguments> provideValidDataForSubtraction() {
+        return Stream.of(
+                Arguments.of(new Integer[][]{{1, 2}, {3, 4}}, new Integer[][]{{5, 6}, {7, 8}}, new Integer[][]{{-4, -4}, {-4, -4}}, DType.INT32),
+                Arguments.of(new Double[][]{{1.0, 2.0}, {3.0, 4.0}}, new Double[][]{{5.0, 6.0}, {7.0, 8.0}}, new Double[][]{{-4.0, -4.0}, {-4.0, -4.0}}, DType.FLOAT64)
+        );
+    }
+
+    static Stream<Arguments> provideValidDataForDivision() {
+        return Stream.of(
+                Arguments.of(new Integer[][]{{10, 20}, {30, 40}}, new Integer[][]{{5, 4}, {3, 2}}, new Integer[][]{{2, 5}, {10, 20}}, DType.INT32),
+                Arguments.of(new Double[][]{{10.0, 20.0}, {30.0, 40.0}}, new Double[][]{{5.0, 4.0}, {3.0, 2.0}}, new Double[][]{{2.0, 5.0}, {10.0, 20.0}}, DType.FLOAT64)
         );
     }
 
