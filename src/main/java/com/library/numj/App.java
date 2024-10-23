@@ -28,29 +28,20 @@ public class App
         System.out.println(out.getClass().getName());
     }
     private static void testArrayCreationOperations() throws ShapeException {
-        NumJ numJ = new NumJ();
-        int[][][] arrayData = {
-                {
-                        {1, 2},
-                        {4,6},
-                        {3,5}
-                },
-                {
-                        {1,3},
-                        {6,9},
-                        {6,8}
-                },
-                {
-                        {1,3},
-                        {9,10},
-                        {11,12}
-                }
-        };
 
-        NDArray arr1 = numJ.ones(new int[]{2});
-        NDArray arr2 = numJ.ones(new int[]{2});
-        NDArray arr3 = numJ.add(arr1, arr2);
-        arr3.printArray();
+        NumJ numJ = new NumJ();
+        Integer[] arr6 = {1,2,3,4,5};
+        Integer[] arr5 = {5,4,3,2,1};
+
+        NDArray<Integer[]> arrData1 = numJ.array(arr6);
+        NDArray<Integer[]> arrData2 = numJ.array(arr5);
+
+        numJ.bitwiseAnd(arrData1, arrData2).printArray();
+        numJ.bitwiseOr(arrData1, arrData2).printArray();
+        numJ.bitwiseXor(arrData1, arrData2).printArray();
+        numJ.invert(arrData1).printArray();
+
+
 
     }
 }

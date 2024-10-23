@@ -13,5 +13,13 @@ public enum OperationType {
     /** Division operation. */
     DIVISION,
     /** Modulo operation. */
-    MODULO
+    MODULO,
+    /** Bitwise AND operation. */
+    BITWISE_AND,
+    /** Bitwise OR operation. */
+    BITWISE_OR,
+    /** Bitwise XOR operation. */
+    BITWISE_XOR,
+    /** Bitwise Inversion operation (NOT). */
+    INVERT,
 }

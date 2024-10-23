@@ -62,6 +62,22 @@ public final class Utils {
         return resultShape;
     }
 
+    public int[] broadcastShapes(List<Integer> shape1) throws ShapeException {
+        int len1 = shape1.size();
+        int[] resultShape = new int[len1];
+
+        // Assume broadcasting to 1 is acceptable
+        for (int i = 0; i < len1; i++) {
+            int dim1 = shape1.get(i);
+            if (dim1 == 0) {
+                throw new ShapeException("Dimension cannot be zero in shape: " + shape1);
+            }
+            resultShape[i] = dim1;  // Simply retain the dimension as-is
+        }
+
+        return resultShape;  // Returns the shape itself with no broadcasting against a second shape
+    }
+
     /**
      * Returns the size in bytes of the given class type.
      *
