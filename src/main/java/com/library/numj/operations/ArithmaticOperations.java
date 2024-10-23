@@ -153,7 +153,7 @@ public class ArithmaticOperations {
 
                 boolean isFloatingPoint = (v1 instanceof Double || v1 instanceof Float);
                 if (!isFloatingPoint) {
-                    outputArray[i] = (R) getNumericResult(v1, operation);
+                    outputArray[i] = (R) getResult(v1, operation);
                 } else {
                     throw new UnsupportedOperationException(unsupportedOperation);
                 }
@@ -164,43 +164,6 @@ public class ArithmaticOperations {
 
         // Construct and return the result NDArray with the broadcasted shape
         return new NumJ().array((R) outputArray).reshape(broadcastedShape);
-    }
-
-    /**
-     * Performs arithmetic operations on floating-point numbers.
-     *
-     * @param v1 The first operand.
-     * @param v2 The second operand.
-     * @param o  The operation type.
-     * @return The result of the operation as a {@code Number}.
-     */
-    private Number getFloatingPointResult(Number v1, Number v2, OperationType o) {
-        if (utils.getElementSize(v1.getClass()) == utils.getElementSize(v2.getClass()) && v1 instanceof Float) {
-            switch (o) {
-                case ADDITION:
-                    return v1.floatValue() + v2.floatValue();
-                case SUBTRACTION:
-                    return v1.floatValue() - v2.floatValue();
-                case MULTIPLICATION:
-                    return v1.floatValue() * v2.floatValue();
-                case DIVISION:
-                    return v1.floatValue() / v2.floatValue();
-                default:
-                    throw new UnsupportedOperationException(unsupportedOperation);
-            }
-        }
-        switch (o) {
-            case ADDITION:
-                return v1.doubleValue() + v2.doubleValue();
-            case SUBTRACTION:
-                return v1.doubleValue() - v2.doubleValue();
-            case MULTIPLICATION:
-                return v1.doubleValue() * v2.doubleValue();
-            case DIVISION:
-                return v1.doubleValue() / v2.doubleValue();
-            default:
-                throw new UnsupportedOperationException(unsupportedOperation);
-        }
     }
 
     /**
@@ -231,26 +194,24 @@ public class ArithmaticOperations {
                 result = v1.longValue() % v2.longValue(); break;
 
             case BITWISE_AND:
-                return dominating instanceof Byte ? v1.byteValue() & v2.byteValue() :
-                        dominating instanceof Short ? v1.shortValue() & v2.shortValue() :
-                                dominating instanceof Integer ? v1.intValue() & v2.intValue() :
-                                        v1.longValue() & v2.longValue();
+                result = v1.longValue() & v2.longValue();break;
 
             case BITWISE_OR:
-                return dominating instanceof Byte ? v1.byteValue() | v2.byteValue() :
-                        dominating instanceof Short ? v1.shortValue() | v2.shortValue() :
-                                dominating instanceof Integer ? v1.intValue() | v2.intValue() :
-                                        v1.longValue() | v2.longValue();
+                result = v1.longValue() | v2.longValue(); break;
 
             case BITWISE_XOR:
-                return dominating instanceof Byte ? v1.byteValue() ^ v2.byteValue() :
-                        dominating instanceof Short ? v1.shortValue() ^ v2.shortValue() :
-                                dominating instanceof Integer ? v1.intValue() ^ v2.intValue() :
-                                        v1.longValue() ^ v2.longValue();
+                result = v1.longValue() ^ v2.longValue(); break;
 
             default:
                 throw new UnsupportedOperationException(unsupportedOperation);
         }
+
+        if(dominating instanceof Byte) return result.byteValue();
+        if(dominating instanceof Short) return result.shortValue();
+        if(dominating instanceof Integer) return result.intValue();
+        if(dominating instanceof Float) return result.floatValue();
+        if(dominating instanceof Double) return result.doubleValue();
+        return result.longValue();
 
     }
 
@@ -262,19 +223,18 @@ public class ArithmaticOperations {
      * @return                  The result of the operation as a {@code Number}.
      */
     private Number getTypedValue(Number v1, OperationType o) {
+        Number result;
         switch (o) {
             case INVERT:
-                return v1 instanceof Byte ? (byte) ~v1.byteValue() :
-                        v1 instanceof Short ? (short) ~v1.shortValue() :
-                                v1 instanceof Integer ? ~v1.intValue() : ~v1.longValue();
+                result = ~v1.longValue(); break;
             default:
                 throw new UnsupportedOperationException(unsupportedOperation);
         }
-        if(dominating instanceof Byte) return result.byteValue();
-        if(dominating instanceof Short) return result.shortValue();
-        if(dominating instanceof Integer) return result.intValue();
-        if(dominating instanceof Float) return result.floatValue();
-        if(dominating instanceof Double) return result.doubleValue();
+        if(v1 instanceof Byte) return result.byteValue();
+        if(v1 instanceof Short) return result.shortValue();
+        if(v1 instanceof Integer) return result.intValue();
+        if(v1 instanceof Float) return result.floatValue();
+        if(v1 instanceof Double) return result.doubleValue();
         return result.longValue();
     }
 
@@ -294,13 +254,7 @@ public class ArithmaticOperations {
             return getTypedValue(v1, v2, v2, o);
         }
     }
-    private Number getNumericResult(Number v1, Number v2, OperationType o) {
-        if (utils.getElementSize(v1.getClass()) > utils.getElementSize(v2.getClass())) {
-            return getTypedValue(v1, v2, v1, o);
-        } else {
-            return getTypedValue(v1, v2, v2, o);
-        }
-    }
+
     /**
      * Return the typed value after performing operation
      *
@@ -308,7 +262,7 @@ public class ArithmaticOperations {
      * @param o     The operation type.
      * @return      The result of the operation as a {@code Number}.
      */
-    private Number getNumericResult(Number v1, OperationType o) {
+    private Number getResult(Number v1, OperationType o){
         return getTypedValue(v1, o);
     }
 
