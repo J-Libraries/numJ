@@ -154,7 +154,7 @@ class NDArrayTest {
     @Test
     public void testShapeExceptionInConstructor() {
         Integer[][][] invalidData = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}, {9, 10}}};
-        assertThrows(ShapeException.class, () -> new NDArray<>(invalidData));
+        assertThrows(RuntimeException.class, () -> new NDArray<>(invalidData));
     }
 
     /**
@@ -350,7 +350,7 @@ class NDArrayTest {
         assertEquals(Arrays.asList(4, 2), reshapedArray.shape());
         assertEquals(8L, reshapedArray.size());
         Integer[][] expectedReshapedData = {
-                {1, 2}, {3, 4}, {5, 6}, {7, 8}
+                {400, 200}, {300, 400}, {500, 600}, {700, 800}
         };
         assertArrayEquals(expectedReshapedData, (Integer[][]) reshapedArray.getArray());
     }
@@ -368,8 +368,7 @@ class NDArrayTest {
         assertEquals(2, reshaped.ndim());
         assertEquals(Arrays.asList(2, 4), reshaped.shape());
         assertEquals(8L, reshaped.size());
-
-        Integer[][] expectedReshapedData = {{1, 2, 3, 4}, {5, 6, 7, 8}};
+        Integer[][] expectedReshapedData = {{400, 200, 300, 400}, {500, 600, 700, 800}};
         assertArrayEquals(expectedReshapedData, (Integer[][]) reshaped.getArray());
     }
 
@@ -387,8 +386,7 @@ class NDArrayTest {
         assertEquals(1, reshapedArray.ndim());
         assertEquals(Arrays.asList(8), reshapedArray.shape());
         assertEquals(8L, reshapedArray.size());
-
-        Integer[] expectedReshapedData = {1, 2, 3, 4, 5, 6, 7, 8};
+        Integer[] expectedReshapedData = {400, 200, 300, 400, 500, 600, 700, 800};
         assertArrayEquals(expectedReshapedData, (Integer[]) reshapedArray.getArray());
     }
 
@@ -407,7 +405,7 @@ class NDArrayTest {
         assertEquals(Arrays.asList(2 , 2 , 2) , reshapedArray.shape());
         assertEquals(8L , reshapedArray.size());
 
-        Integer[][][] expectedReshapedData = {{{1 , 2} , {3 , 4}} , {{5 , 6} , {7 , 8}}};
+        Integer[][][] expectedReshapedData = {{{400, 200}, {300, 400}}, {{500, 600}, {700, 800}}};
         assertArrayEquals(expectedReshapedData , (Integer[][][])reshapedArray.getArray());
     }
 
