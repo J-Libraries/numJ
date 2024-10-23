@@ -50,8 +50,8 @@ public class ArithmaticOperations {
         T[] flatArr1 = (T[]) arr1.flatten().getArray();
         T[] flatArr2 = (T[]) arr2.flatten().getArray();
         // Get element sizes for proper indexing
-        int elementSize1 = utils.getElementSize(Array.get(flatArr1, 0).getClass());
-        int elementSize2 = utils.getElementSize(Array.get(flatArr2, 0).getClass());
+        int elementSize1 = utils.getElementSize(arr1.type().is());
+        int elementSize2 = utils.getElementSize(arr2.type().is());
 
         // Initialize the output array
         R[] outputArray = (R[]) new Object[totalElements];
@@ -60,7 +60,6 @@ public class ArithmaticOperations {
         int arr2Offset = broadcastedShape.length - arr2.shape().size();
 
         // Perform the operation element-wise
-//        for (int i = 0; i < totalElements; i++){
             IntStream.range(0, totalElements).forEach(i ->{
             // Compute multi-dimensional indices for broadcasting
             int[] multiDimIndices = utils.getMultiDimIndices(i, broadcastedShape);
@@ -84,7 +83,6 @@ public class ArithmaticOperations {
                     arr2Indices[index] = multiDimIndices[arr2Offset + index];
                 }
             });
-
             // Compute flat indices for the operands
             int arr1FlatIndex = utils.getFlatIndex(arr1Indices, arr1Strides) / elementSize1;
             int arr2FlatIndex = utils.getFlatIndex(arr2Indices, arr2Strides) / elementSize2;
@@ -93,53 +91,17 @@ public class ArithmaticOperations {
             if (flatArr1[arr1FlatIndex] instanceof Number && flatArr2[arr2FlatIndex] instanceof Number) {
                 Number v1 = (Number) flatArr1[arr1FlatIndex];
                 Number v2 = (Number) flatArr2[arr2FlatIndex];
-//                boolean isFloatingPoint = (v1 instanceof Double || v1 instanceof Float || v2 instanceof Double || v2 instanceof Float);
-                outputArray[i] = (R) getResult(v1, v2, operation);//(isFloatingPoint ? getFloatingPointResult(v1, v2, operation) : getNumericResult(v1, v2, operation));
+                outputArray[i] = (R) getResult(v1, v2, operation);
             } else {
                 outputArray[i] = (R) stringOperation(flatArr1[arr1FlatIndex].toString(), flatArr2[arr2FlatIndex].toString(), operation);
             }
         });
 
         // Construct and return the result NDArray with the broadcasted shape
-        return  new NumJ().array((R) outputArray).reshape(broadcastedShape);
+        NDArray array = new NumJ().array((R) outputArray);
+        return  array.reshape(broadcastedShape);
     }
 
-    /**
-     * Performs arithmetic operations on floating-point numbers.
-     *
-     * @param v1 The first operand.
-     * @param v2 The second operand.
-     * @param o  The operation type.
-     * @return The result of the operation as a {@code Number}.
-     */
-    private Number getFloatingPointResult(Number v1, Number v2, OperationType o) {
-        if (utils.getElementSize(v1.getClass()) == utils.getElementSize(v2.getClass()) && v1 instanceof Float) {
-            switch (o) {
-                case ADDITION:
-                    return v1.floatValue() + v2.floatValue();
-                case SUBTRACTION:
-                    return v1.floatValue() - v2.floatValue();
-                case MULTIPLICATION:
-                    return v1.floatValue() * v2.floatValue();
-                case DIVISION:
-                    return v1.floatValue() / v2.floatValue();
-                default:
-                    throw new UnsupportedOperationException(unsupportedOperation);
-            }
-        }
-        switch (o) {
-            case ADDITION:
-                return v1.doubleValue() + v2.doubleValue();
-            case SUBTRACTION:
-                return v1.doubleValue() - v2.doubleValue();
-            case MULTIPLICATION:
-                return v1.doubleValue() * v2.doubleValue();
-            case DIVISION:
-                return v1.doubleValue() / v2.doubleValue();
-            default:
-                throw new UnsupportedOperationException(unsupportedOperation);
-        }
-    }
 
     /**
      * Performs arithmetic operations on numeric types with the dominating data type.
@@ -151,50 +113,32 @@ public class ArithmaticOperations {
      * @return The result of the operation as a {@code Number}.
      */
     private Number getTypedValue(Number v1, Number v2, Number dominating, OperationType o) {
-
+        Number result;
         switch (o) {
             case ADDITION:
-                return dominating instanceof Byte ? v1.byteValue() + v2.byteValue() :
-                        dominating instanceof Short ? v1.shortValue() + v2.shortValue() :
-                                dominating instanceof Integer ? v1.intValue() + v2.intValue() :
-                                        dominating instanceof Float ? v1.floatValue() + v2.floatValue() :
-                                                dominating instanceof Double ? v1.doubleValue() + v2.doubleValue() :
-                                                        v1.longValue() + v2.longValue();
+                result = v1.doubleValue()+v2.doubleValue(); break;
 
             case SUBTRACTION:
-                return dominating instanceof Byte ? v1.byteValue() - v2.byteValue() :
-                        dominating instanceof Short ? v1.shortValue() - v2.shortValue() :
-                                dominating instanceof Integer ? v1.intValue() - v2.intValue() :
-                                        dominating instanceof Float ? v1.floatValue() - v2.floatValue() :
-                                                dominating instanceof Double ? v1.doubleValue() - v2.doubleValue() :
-                                                        v1.longValue() - v2.longValue();
+                result = v1.doubleValue() - v2.doubleValue(); break;
 
             case MULTIPLICATION:
-                return dominating instanceof Byte ? ((short) v1.byteValue() * v2.byteValue()) :
-                        dominating instanceof Short ? ((int) v1.shortValue() * v2.shortValue()) :
-                                dominating instanceof Integer ? ((long)v1.intValue() * v2.intValue()) :
-                                        dominating instanceof Float ? v1.floatValue() * v2.floatValue() :
-                                                dominating instanceof Double ? v1.doubleValue() * v2.doubleValue() :
-                                                        v1.longValue() * v2.longValue();
+                result = v1.doubleValue() * v2.doubleValue(); break;
 
             case DIVISION:
-                return dominating instanceof Byte ? (v1.byteValue() / v2.byteValue()) :
-                        dominating instanceof Short ? (v1.shortValue() / v2.shortValue()) :
-                                dominating instanceof Integer ? (v1.intValue() / v2.intValue()) :
-                                        dominating instanceof Float ? v1.floatValue() / v2.floatValue() :
-                                                dominating instanceof Double ? v1.doubleValue() / v2.doubleValue() :
-                                                        v1.longValue() / v2.longValue();
+                result = v1.doubleValue() / v2.doubleValue(); break;
 
             case MODULO:
-                return dominating instanceof Byte ? v1.byteValue() % v2.byteValue() :
-                        dominating instanceof Short ? v1.shortValue() % v2.shortValue() :
-                                dominating instanceof Integer ? v1.intValue() % v2.intValue() :
-                                        v1.longValue() % v2.longValue();
+                result = v1.longValue() % v2.longValue(); break;
 
             default:
                 throw new UnsupportedOperationException(unsupportedOperation);
         }
-
+        if(dominating instanceof Byte) return result.byteValue();
+        if(dominating instanceof Short) return result.shortValue();
+        if(dominating instanceof Integer) return result.intValue();
+        if(dominating instanceof Float) return result.floatValue();
+        if(dominating instanceof Double) return result.doubleValue();
+        return result.longValue();
     }
 
     /**
@@ -213,14 +157,6 @@ public class ArithmaticOperations {
             return getTypedValue(v1, v2, v2, o);
         }
     }
-    private Number getNumericResult(Number v1, Number v2, OperationType o) {
-        if (utils.getElementSize(v1.getClass()) > utils.getElementSize(v2.getClass())) {
-            return getTypedValue(v1, v2, v1, o);
-        } else {
-            return getTypedValue(v1, v2, v2, o);
-        }
-    }
-
     /**
      * Performs string concatenation or throws an exception for unsupported operations.
      *
