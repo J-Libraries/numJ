@@ -102,6 +102,69 @@ public class ArithmaticOperations {
         return  array.reshape(broadcastedShape);
     }
 
+    /**
+     * Performs the specified arithmetic operation on NDArray with broadcasting support.
+     *
+     * @param arr1              The First NDArray operand
+     * @param operation         The Type of arithmetic operation to perform
+     * @return                  A new NDArray containing the result of the operation.
+     * @throws ShapeException   If the shapes of arr1 and arr2 are incompatible for broadcasting.
+     */
+    public <T, R> NDArray<R> operate(NDArray<T> arr1, OperationType operation) throws ShapeException {
+        int[] broadcastedShape = utils.broadcastShapes(arr1.shape());
+        long totalElementsLong = Arrays.stream(broadcastedShape).reduce(1, (a, b) -> a * b);
+        int[] arr1Strides = arr1.strides();
+
+        int totalElements = (int) totalElementsLong;
+
+        T[] flatArr1 = (T[]) arr1.flatten().getArray();
+
+        // Get element sizes for proper indexing
+        int elementSize1 = utils.getElementSize(flatArr1[0].getClass());
+
+        // Initialize the output array
+        R[] outputArray = (R[]) new Object[totalElements];
+
+        int arr1Offset = broadcastedShape.length - arr1.shape().size();
+
+        // Perform the operation element-wise
+//        for (int i = 0; i < totalElements; i++){
+        IntStream.range(0, totalElements).forEach(i -> {
+            // Compute multi-dimensional indices for broadcasting
+            int[] multiDimIndices = utils.getMultiDimIndices(i, broadcastedShape);
+
+            // Adjust indices for arr1 based on its shape
+            int[] arr1Indices = new int[arr1.shape().size()];
+
+            IntStream.range(0, arr1.shape().size()).parallel().forEach(index -> {
+                if (arr1.shape().get(index) == 1) {
+                    arr1Indices[index] = 0;
+                } else {
+                    arr1Indices[index] = multiDimIndices[arr1Offset + index];
+                }
+            });
+
+            // Compute flat indices for the operands
+            int arr1FlatIndex = utils.getFlatIndex(arr1Indices, arr1Strides) / elementSize1;
+
+            // Perform the operation based on the type of elements
+            if (flatArr1[arr1FlatIndex] instanceof Number) {
+                Number v1 = (Number) flatArr1[arr1FlatIndex];
+
+                boolean isFloatingPoint = (v1 instanceof Double || v1 instanceof Float);
+                if (!isFloatingPoint) {
+                    outputArray[i] = (R) getResult(v1, operation);
+                } else {
+                    throw new UnsupportedOperationException(unsupportedOperation);
+                }
+            } else {
+                throw new UnsupportedOperationException(unsupportedOperation);
+            }
+        });
+
+        // Construct and return the result NDArray with the broadcasted shape
+        return new NumJ().array((R) outputArray).reshape(broadcastedShape);
+    }
 
     /**
      * Performs arithmetic operations on numeric types with the dominating data type.
@@ -130,14 +193,48 @@ public class ArithmaticOperations {
             case MODULO:
                 result = v1.longValue() % v2.longValue(); break;
 
+            case BITWISE_AND:
+                result = v1.longValue() & v2.longValue();break;
+
+            case BITWISE_OR:
+                result = v1.longValue() | v2.longValue(); break;
+
+            case BITWISE_XOR:
+                result = v1.longValue() ^ v2.longValue(); break;
+
             default:
                 throw new UnsupportedOperationException(unsupportedOperation);
         }
+
         if(dominating instanceof Byte) return result.byteValue();
         if(dominating instanceof Short) return result.shortValue();
         if(dominating instanceof Integer) return result.intValue();
         if(dominating instanceof Float) return result.floatValue();
         if(dominating instanceof Double) return result.doubleValue();
+        return result.longValue();
+
+    }
+
+    /**
+     * Performs arithmetic operations on numeric types.
+     *
+     * @param v1                The first operand.
+     * @param o                 The operation type.
+     * @return                  The result of the operation as a {@code Number}.
+     */
+    private Number getTypedValue(Number v1, OperationType o) {
+        Number result;
+        switch (o) {
+            case INVERT:
+                result = ~v1.longValue(); break;
+            default:
+                throw new UnsupportedOperationException(unsupportedOperation);
+        }
+        if(v1 instanceof Byte) return result.byteValue();
+        if(v1 instanceof Short) return result.shortValue();
+        if(v1 instanceof Integer) return result.intValue();
+        if(v1 instanceof Float) return result.floatValue();
+        if(v1 instanceof Double) return result.doubleValue();
         return result.longValue();
     }
 
@@ -157,6 +254,18 @@ public class ArithmaticOperations {
             return getTypedValue(v1, v2, v2, o);
         }
     }
+
+    /**
+     * Return the typed value after performing operation
+     *
+     * @param v1    The first operand.
+     * @param o     The operation type.
+     * @return      The result of the operation as a {@code Number}.
+     */
+    private Number getResult(Number v1, OperationType o){
+        return getTypedValue(v1, o);
+    }
+
     /**
      * Performs string concatenation or throws an exception for unsupported operations.
      *

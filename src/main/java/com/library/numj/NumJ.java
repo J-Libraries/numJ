@@ -320,6 +320,53 @@ public class NumJ {
 	}
 
 	/**
+	 * Performs Bitwise-And operation on first NDArray and second NDArray.
+	 *
+	 * @param arr1 The numerator NDArray.
+	 * @param arr2 The denominator NDArray.
+	 * @return A new NDArray containing the result of element-wise Bitwise-And.
+	 * @throws ShapeException If the shapes of arr1 and arr2 are not compatible for broadcasting.
+	 */
+	public <T> NDArray<T> bitwiseAnd(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException{
+		return arithmaticOperations.operate(arr1, arr2, OperationType.BITWISE_AND);
+	}
+
+	/**
+	 * Performs Bitwise-Or operation on first NDArray and second NDArray.
+	 *
+	 * @param arr1 The numerator NDArray.
+	 * @param arr2 The denominator NDArray.
+	 * @return A new NDArray containing the result of element-wise Bitwise-Or.
+	 * @throws ShapeException If the shapes of arr1 and arr2 are not compatible for broadcasting.
+	 */
+	public <T> NDArray<T> bitwiseOr(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException{
+		return arithmaticOperations.operate(arr1, arr2, OperationType.BITWISE_OR);
+	}
+
+	/**
+	 * Performs Bitwise-Xor operation on first NDArray and second NDArray.
+	 *
+	 * @param arr1 The numerator NDArray.
+	 * @param arr2 The denominator NDArray.
+	 * @return A new NDArray containing the result of element-wise Bitwise-Xor.
+	 * @throws ShapeException If the shapes of arr1 and arr2 are not compatible for broadcasting.
+	 */
+	public <T> NDArray<T> bitwiseXor(NDArray<T> arr1, NDArray<T> arr2) throws ShapeException{
+		return arithmaticOperations.operate(arr1, arr2, OperationType.BITWISE_XOR);
+	}
+
+	/**
+	 * Performs Inversion operation (NOT) on NDArray.
+	 *
+	 * @param arr1 The numerator NDArray.
+	 * @return A new NDArray containing the result of element-wise Inversion (Not).
+	 * @throws ShapeException If the shapes of arr1 and arr2 are not compatible for broadcasting.
+	 */
+	public <T> NDArray<T> invert(NDArray<T> arr1) throws ShapeException{
+		return arithmaticOperations.operate(arr1, OperationType.INVERT);
+	}
+
+	/**
 	 * Transposes the given NDArray.
 	 *
 	 * @param array The NDArray to be transposed.

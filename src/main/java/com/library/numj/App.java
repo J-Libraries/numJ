@@ -28,7 +28,19 @@ public class App
         System.out.println(out.getClass().getName());
     }
     private static void testArrayCreationOperations() throws ShapeException {
+
         NumJ numJ = new NumJ();
+        Integer[] arr6 = {1,2,3,4,5};
+        Integer[] arr5 = {5,4,3,2,1};
+
+        NDArray<Integer[]> arrData1 = numJ.array(arr6);
+        NDArray<Integer[]> arrData2 = numJ.array(arr5);
+
+        numJ.bitwiseAnd(arrData1, arrData2).printArray();
+        numJ.bitwiseOr(arrData1, arrData2).printArray();
+        numJ.bitwiseXor(arrData1, arrData2).printArray();
+        numJ.invert(arrData1).printArray();
+
         int[][][] arrayData = {
                 {
                         {1, 2},
@@ -54,6 +66,5 @@ public class App
         out.printArray();
 //        NDArray transposed = numJ.transpose(arr);
 //        transposed.printArray();
-
     }
 }
